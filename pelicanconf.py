@@ -11,7 +11,7 @@ SITELOGO = 'logo8.png'
 
 
 LINKEDIN_URL = 'http://www.linkedin.com/pub/katie-green/12/651/70a'
-TWITTER_URL = 'https://twitter.com/katiefg28'
+TWITTER_URL = 'https://twitter.com/katie_fg'
 
 TIMEZONE = 'Europe/Helsinki'
 DATE_FORMATS = {'en': '%b %d,  %Y'}
