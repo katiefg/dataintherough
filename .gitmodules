@@ -1,0 +1,6 @@
+[submodule "pelican-plugins"]
+	path = pelican-plugins
+	url = https://github.com/getpelican/pelican-plugins
+[submodule "lannisport"]
+	path = lannisport
+	url = https://github.com/siovene/lannisport
