@@ -77,9 +77,9 @@
 
             <dt><i class="icon-tags"></i></dt>
             <dd>
-                    <a href="../../../../tag/pelican.html">pelican</a>
-<span class="separator">/</span>                    <a href="../../../../tag/github.html">github</a>
-<span class="separator">/</span>                    <a href="../../../../tag/git.html">git</a>
+                    <a href="../../../../tag/pelican.html">Pelican</a>
+<span class="separator">/</span>                    <a href="../../../../tag/github.html">GitHub</a>
+<span class="separator">/</span>                    <a href="../../../../tag/git.html">Git</a>
             </dd>
         </dl>
 
@@ -93,15 +93,15 @@
             <article class="entry">
     <p>Hello, everyone!</p>
 <p>I'm writing up my first d3.js post right now, but I thought that I'd do a quick little post on how I 
-actually published this pelican blog through github pages. 
-For someone publishing their first-ever pelican blog, perhaps this will be helpful.</p>
-<p>Here's what I did after creating the files for the blog as per the pelican documentation:</p>
+actually published this Pelican blog through GitHub Pages. 
+For someone publishing their first-ever Pelican blog, perhaps this will be helpful.</p>
+<p>Here's what I did after creating the files for the blog as per the Pelican documentation:</p>
 <p>I created a new empty directory called dataintherough (the directory containing all of my 
 blog code is called "blog_code": this is a separate directory).</p>
-<p>I created a new repo called dataintherough on github by going to my repositories page and 
+<p>I created a new repo called dataintherough on GitHub by going to my repositories page and 
 clicking the green "New" Button.</p>
 <p>I selected the option to initialize with README.</p>
-<p>Then I followed the following instructions github gave once the repo was created, from 
+<p>Then I followed the following instructions GitHub gave once the repo was created, from 
  inside the the empty directory:</p>
 <div class="highlight"><pre><span class="n">git</span> <span class="n">init</span>
 <span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">origin</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/katiefg/testblog.git</span>
@@ -109,11 +109,11 @@ clicking the green "New" Button.</p>
 
 
 <p>Now my newly created repo had a remote origin and a "master" branch. My master branch 
-contains my pelican code. You can push your pelican code to your own master branch if you like. At this point, what I really needed to do was create a new branch just for the output.</p>
+contains my Pelican code. You can push your Pelican code to your own master branch if you like. At this point, what I really needed to do was create a new branch just for the output.</p>
 <ul>
 <li>Pelican reminder: your output is stored wherever your OUTPUT_PATH leads to in your config file. For me, 
 this directory is just called "output". To I generate this output whenever I've edited the content 
-or pelican code, I run:  <div class="highlight"><pre><span class="n">pelican</span> <span class="o">-</span><span class="n">s</span> <span class="o">&lt;</span><span class="n">name</span> <span class="n">of</span> <span class="n">your</span> <span class="n">config</span> <span class="n">file</span><span class="p">(</span><span class="n">mine</span> <span class="n">is</span> <span class="n">pelicanconf</span><span class="p">.</span><span class="n">py</span><span class="p">)</span><span class="o">&gt;</span> 
+or Pelican code, I run:  <div class="highlight"><pre><span class="n">pelican</span> <span class="o">-</span><span class="n">s</span> <span class="o">&lt;</span><span class="n">name</span> <span class="n">of</span> <span class="n">your</span> <span class="n">config</span> <span class="n">file</span><span class="p">(</span><span class="n">mine</span> <span class="n">is</span> <span class="n">pelicanconf</span><span class="p">.</span><span class="n">py</span><span class="p">)</span><span class="o">&gt;</span> 
 <span class="n">make</span> <span class="n">html</span>
 </pre></div>
 
@@ -151,14 +151,14 @@ Finally, I pushed what I had just committed:</p>
 
 <p>I waited for about ten minutes for the page to load the first time, and then went to the page.
 If you do this, your url will be https://&lt;yourusername&gt;.github.io/&lt;reponame&gt;. 
-You can see that my URL follows this format (although you do have the option in github pages of using a custom domain!)</p>
-<p>Also, if you substitute the whole "pelican output" part of this process with any valid 
+You can see that my URL follows this format (although you do have the option in GitHub Pages of using a custom domain!)</p>
+<p>Also, if you substitute the whole "Pelican output" part of this process with any valid 
 html, you can use the same process. Just make a directory for it, initialize git, create a remote, make a new branch, get the code in 
 there, add, commit, and push.</p>
 <p><em>Updating the blog</em></p>
-<p>Of course, blogs get updated frequently. Github pages makes it easy to do this. You can work on and test the blog in from your working 
+<p>Of course, blogs get updated frequently. GitHub Pages makes it easy to do this. You can work on and test the blog in from your working 
 directory (blog_code), then when you've got your output ready, you can just replace the 
-contents of the github directory (dataintherough) and repeat the add/push/commit process.</p>
+contents of the GitHub directory (dataintherough) and repeat the add/push/commit process.</p>
 <p>If any of this doesn't work please let me know and hopefully I can help. I'd also like to thank two people who work at EdX, named Feanil and John, who were particularly helpful in this endeavor at the March Boston Python User Group project night.</p>
 <p>I'm looking forward to carrying out this update process many times as I continue to blog!</p>
 
