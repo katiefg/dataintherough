@@ -345,7 +345,7 @@ ul {
     font:normal normal 400 1rem/1.125rem Georgia, serif;
 }
 
-ol {
+/* ol {
     list-style: upper-roman;
     color: #DC143C;
 }
@@ -353,6 +353,7 @@ ol {
 ol p {
     color: #444;
 }
+*/
 
 ul {
     list-style: none;
