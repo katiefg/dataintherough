@@ -59,6 +59,192 @@
 <div class="article-page">
     <div class="span7 offset2">
         <header class="article">
+            <h2><a href="./posts/2014/03/collaborative_filtering/" rel="bookmark">Collaborative item-based filtering for specific demographics</a></h2>
+            <time datetime="2014-03-20T00:00:00">
+                Mar 20, 2014
+            </time>
+        </header>
+    </div>
+
+    <div class="span2">
+    </div>
+
+    <div class="span7">
+        <section>
+            <article class="entry">
+    <div id="first-article">
+        <p>This post is inspired by a situation I find myself in sometimes – going back home every year or so and deciding on movies to watch with my parents. I’ve lived on the opposite coast from them for about 6 years, so I don’t have a lot of data about their movie preferences as of late. Making them fill out a movie survey would be time consuming for them. I do know other things about them, though! I know their ages, I know their jobs, I know where they live. I also, obviously, have a lot of data about my own movie preferences. What if I could combine my movie preferences with their demographic info to get some recommendations for what movies we might want to watch together? </p>
+<p>I am going to show you how to do this by adapting an algorithm from the book Programming Collective Intelligence: Building Smart Web 2.0 Applications by Toby Segaran. (Copyright 2007 Toby Segaran, 978-0-596-52932-1)</p>
+<p>Segaran describes collaborative item-based filtering. He uses the Euclidean distance score  to find out how similar films are to one another, and which films are most similar to the films that someone rates highly.</p>
+<p>The idea is that you can rate as many movies on this list as you like, and then get back a list of recommendations.</p>
+<p>The process Segaran uses goes, very generally, like this:</p>
+<ol>
+<li>
+<p 1_="1," 3="3" 3_:="3’:" 5_="5," Hereafter_:="Hereafter’:" Shell_:="Shell’:" Sweet="Sweet" _Gattaca_:="‘Gattaca’:" _Ghost="{‘Ghost" _Katie_:="‘Katie’:" _Robocop="‘Robocop" _The="‘The" in="in" the="the">Create a nested dictionary that matches movies to their rating for each rater. One rater entry for a small list of movies would look something like this:</p>
+<ul>
+<li>In the MovieLens set, the raters are ID numbers and not names. Segaran used names as an example for clarity; I borrowed that strategy from him.</li>
+</ul>
+</li>
+<li>
+<p>Write a function that returns the Euclidean distance between two points. You can also use the Pearson Correlation Score, but I’m not going to do that right now – I’ll get to the reason in a bit. </p>
+</li>
+<li>
+<p>Write a function that inverts the dictionary to be one that matches raters to their rating for each movie. (e.g. {‘Ghost in the Shell’: {‘Katie’ : 5, ‘Judy’: 4, ‘Tommy’: 3}}) </p>
+</li>
+<li>
+<p>Write a function that generates a list of similarity scores based on Euclidean distance between any given item and every other item in the dictionary. Then, the function should sort the results in order of similarity. This function uses the Euclidean distance function from #2.</p>
+<ul>
+<li>This brings us back to the reason I did not use the Pearson correlation score. When calculating similarity of raters, the Pearson score makes a lot of sense, because it corrects for score inflation – in other words, if one rater routinely is harsher than another but their relative scores of the different movies are similar, the Pearson score will calculate them as more similar than will the Euclidean distance score. Correcting with that sort of inflation seems very logical for rater similarity but seems a bit more complicated with item similarity. I don’t necessarily want two movies that have very different ratings but have the same relative preferedness among the raters to be scored as similar. I want to account for the fact that one movie gets higher ratings – I don’t want to correct for “movie inflation” because that information seems to have value. I’m absolutely open to being proven wrong on this decision.</li>
+</ul>
+</li>
+<li>
+<p>Write a function that “loops over every item and passes the transformed dictionary to the topMatches function (described in #3) to get the most similar items along with their similarity scores. Finally, it creates and returns a dictionary of items along with a list of their most similar items.” (from p. 23 of the book). </p>
+</li>
+<li>
+<p>Finally, write a function that (barely paraphrasing, often quoting):</p>
+<ul>
+<li>Loops over the items rated by any given user (you get the ratings by user from the original, user-based dict)</li>
+<li>Loops over items similar to this one as calculated by the previous function (but ignore the ones the user has already rated)</li>
+<li>Calculates the weighted sum of rating times similarity</li>
+<li>Sums all the similarities</li>
+<li>Divides each total score by the total weighting – now you have an average</li>
+<li>Returns the rankings from the highest to lowest.</li>
+</ul>
+</li>
+</ol>
+<p>At the end of this, you have a list of the movies with the highest score – the score representing how similar a movie is to the movies you rate most highly. </p>
+<p>There’s a wonderful dataset called MovieLens from the University of Minnesota, (link here) on which Segaran runs his item-based filtering code, and I used it to implement his code.  I had a lot of fun doing this so I decided to play around a little bit…</p>
+<p>…which brings us back to the demographic-based recommendation idea I mentioned at the beginning of this post. I’m going to focus just on age right now, with the idea that we can add in other demographic information as we wish, using the same method. I want a list of movies that are similar to my interests, based only on the age group that is similar to my parents.</p>
+<p>This can be accomplished by telling the script to only look at ratings from a specific age bracket when calculating the Euclidean distance of two items. Here is Segaran’s function for Euclidean distance, slightly modified to incorporate a specific age bracket. Variable names are also changed from the book version to clarify that this code is being used for item, not user, similarity.</p>
+<div class="highlight"><pre><span class="n">import</span> <span class="n">pandas</span> <span class="n">as</span> <span class="n">pd</span>
+<span class="n">from</span> <span class="n">pandas</span> <span class="n">import</span> <span class="n">read_csv</span>
+<span class="n">from</span> <span class="n">math</span> <span class="n">import</span> <span class="n">sqrt</span>
+<span class="n">from</span> <span class="n">prefs_maker</span> <span class="n">import</span> <span class="n">prefs</span>
+<span class="n">from</span> <span class="n">item_comparison</span> <span class="n">import</span> <span class="n">transformPrefs</span>
+
+<span class="n">user</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="err">&#39;</span><span class="n">user</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">itemPrefs</span> <span class="o">=</span> <span class="n">transformPrefs</span><span class="p">(</span><span class="n">prefs</span><span class="p">)</span>
+
+<span class="n">age</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">user</span><span class="p">.</span><span class="n">index</span><span class="o">:</span>
+    <span class="n">age</span><span class="p">[</span><span class="n">user</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">user</span> <span class="n">id</span><span class="err">&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">user</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="err">&#39;</span><span class="n">age</span><span class="err">&#39;</span><span class="p">]</span>
+
+
+<span class="n">def</span> <span class="n">sim_distance</span><span class="p">(</span><span class="n">itemPrefs</span><span class="p">,</span><span class="n">movie1</span><span class="p">,</span><span class="n">movie2</span><span class="p">,</span> <span class="n">agemin</span><span class="p">,</span> <span class="n">agemax</span><span class="p">)</span><span class="o">:</span>
+    <span class="err">#</span><span class="n">Get</span> <span class="n">the</span> <span class="n">list</span> <span class="n">of</span> <span class="n">shared</span> <span class="n">raters</span>
+    <span class="n">sr</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">person</span> <span class="n">in</span> <span class="n">itemPrefs</span><span class="p">[</span><span class="n">movie1</span><span class="p">].</span><span class="n">keys</span><span class="p">()</span><span class="o">:</span>
+        <span class="k">if</span> <span class="n">age</span><span class="p">[</span><span class="n">person</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">agemin</span> <span class="n">and</span> <span class="n">age</span><span class="p">[</span><span class="n">person</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">agemax</span><span class="o">:</span> 
+            <span class="k">if</span> <span class="n">person</span> <span class="n">in</span> <span class="n">itemPrefs</span><span class="p">[</span><span class="n">movie2</span><span class="p">].</span><span class="n">keys</span><span class="p">()</span><span class="o">:</span>
+                <span class="n">sr</span><span class="p">[</span><span class="n">person</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+    <span class="err">#</span><span class="n">If</span> <span class="n">these</span> <span class="n">movies</span> <span class="n">have</span> <span class="n">no</span> <span class="n">raters</span> <span class="n">in</span> <span class="n">this</span> <span class="n">age</span> <span class="n">group</span> <span class="n">in</span> <span class="n">common</span><span class="p">,</span> <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">len</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="o">:</span> <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="err">#</span><span class="n">Add</span> <span class="n">up</span> <span class="n">the</span> <span class="n">sums</span> <span class="n">of</span> <span class="n">squares</span> <span class="n">of</span> <span class="n">all</span> <span class="n">the</span> <span class="n">differences</span>
+    <span class="n">sum_of_squares</span><span class="o">=</span><span class="n">sum</span><span class="p">([</span><span class="n">pow</span><span class="p">(</span><span class="n">itemPrefs</span><span class="p">[</span><span class="n">movie1</span><span class="p">][</span><span class="n">person</span><span class="p">]</span><span class="o">-</span><span class="n">itemPrefs</span><span class="p">[</span><span class="n">movie2</span><span class="p">]</span>
+        <span class="p">[</span><span class="n">person</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">person</span> <span class="n">in</span> <span class="n">sr</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">))</span>
+</pre></div>
+
+
+<p>Now you have a Euclidean distance between two movies, in which only a specific age bracket has been taken into account. Now you just need to make sure that you have those age inputs in any subsequent function that references the sim_distance function. That way, you can just input the ages into the final function that references all the other functions, and it’ll just plug them in wherever that sim_distance function is used. For example, here’s the modified version of function #4 and function #5:</p>
+<p>Function #4: </p>
+<div class="highlight"><pre><span class="err">#</span><span class="nx">returns</span> <span class="nx">the</span> <span class="nx">best</span> <span class="nx">matches</span> <span class="k">for</span> <span class="nx">person</span> <span class="nx">from</span> <span class="nx">the</span> <span class="nx">prefs</span> <span class="nx">dictionary</span>
+<span class="err">#</span><span class="nx">similarity</span> <span class="kd">function</span> <span class="nx">is</span> <span class="nx">an</span> <span class="nx">optional</span> <span class="nx">parameter</span>
+<span class="nx">def</span> <span class="nx">topMatches</span><span class="p">(</span><span class="nx">itemPrefs</span><span class="p">,</span><span class="nx">movie</span><span class="p">,</span> <span class="nx">agemin</span><span class="p">,</span><span class="nx">agemax</span><span class="p">,</span> <span class="nx">similarity</span><span class="o">=</span><span class="nx">sim_distance</span><span class="p">)</span><span class="o">:</span>
+    <span class="nx">scores</span> <span class="o">=</span> <span class="cp">[</span><span class="p">(</span><span class="nx">similarity</span><span class="p">(</span><span class="nx">itemPrefs</span><span class="p">,</span><span class="nx">movie</span><span class="p">,</span><span class="nx">other</span><span class="p">,</span> <span class="nx">agemin</span><span class="p">,</span> <span class="nx">agemax</span><span class="p">),</span><span class="nx">other</span><span class="p">)</span> 
+        <span class="nb">for</span> <span class="n">other</span> <span class="k">in</span> <span class="nx">itemPrefs</span> <span class="k">if</span> <span class="nx">other</span><span class="o">!=</span><span class="nx">movie</span><span class="cp">]</span>
+
+    <span class="err">#</span><span class="nx">Sort</span> <span class="nx">the</span> <span class="nx">list</span> <span class="nx">so</span> <span class="nx">the</span> <span class="nx">highest</span> <span class="nx">scores</span> <span class="nx">appear</span> <span class="nx">at</span> <span class="nx">the</span> <span class="nx">top</span>
+    <span class="nx">scores</span><span class="p">.</span><span class="nx">sort</span><span class="p">()</span>
+    <span class="nx">scores</span><span class="p">.</span><span class="nx">reverse</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nx">scores</span>
+</pre></div>
+
+
+<p>Function #5: </p>
+<div class="highlight"><pre><span class="n">def</span> <span class="n">calculateSimilarItems</span><span class="p">(</span><span class="n">itemPrefs</span><span class="p">,</span> <span class="n">agemin</span><span class="p">,</span> <span class="n">agemax</span><span class="p">)</span><span class="o">:</span>
+    <span class="err">#</span><span class="n">Initialize</span> <span class="n">an</span> <span class="n">empty</span> <span class="n">dict</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="n">in</span> <span class="n">itemPrefs</span><span class="o">:</span>
+        <span class="err">#</span><span class="n">Status</span> <span class="n">updates</span> <span class="k">for</span> <span class="n">large</span> <span class="n">datasets</span>
+        <span class="n">c</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">%</span><span class="mi">100</span><span class="o">==</span><span class="mi">0</span><span class="o">:</span> <span class="n">print</span> <span class="s">&quot;%d / %d&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">len</span><span class="p">(</span><span class="n">itemPrefs</span><span class="p">))</span>
+        <span class="err">#</span><span class="n">Find</span> <span class="n">the</span> <span class="n">most</span> <span class="n">similar</span> <span class="n">items</span> <span class="n">to</span> <span class="n">this</span> <span class="n">one</span> <span class="n">based</span> <span class="n">on</span> <span class="n">our</span> <span class="n">age</span><span class="o">-</span><span class="n">based</span> 
+        <span class="err">#</span><span class="n">similarity</span> <span class="n">score</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">topMatches</span><span class="p">(</span><span class="n">itemPrefs</span><span class="p">,</span><span class="n">item</span><span class="p">,</span> <span class="n">agemin</span><span class="p">,</span> <span class="n">agemax</span><span class="p">,</span> 
+            <span class="n">similarity</span><span class="o">=</span><span class="n">sim_distance</span><span class="p">)</span>
+        <span class="err">#</span><span class="n">make</span> <span class="n">an</span> <span class="n">entry</span> <span class="n">in</span> <span class="n">the</span> <span class="n">dict</span> <span class="k">for</span> <span class="n">each</span> <span class="n">movie</span><span class="p">,</span> <span class="n">and</span> <span class="n">make</span> <span class="n">the</span> <span class="n">value</span> <span class="k">for</span> 
+        <span class="err">#</span><span class="n">that</span> <span class="n">movie</span> <span class="n">its</span> <span class="n">matches</span> <span class="n">in</span> <span class="n">order</span> <span class="n">of</span> <span class="n">similarity</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">=</span><span class="n">scores</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+
+<p>Function #6:</p>
+<div class="highlight"><pre><span class="n">def</span> <span class="n">getRecommendedItems</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span> <span class="n">itemMatch</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span><span class="o">:</span>
+    <span class="n">userRatings</span> <span class="o">=</span> <span class="n">prefs</span><span class="p">[</span><span class="n">user</span><span class="p">]</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">totalSim</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="err">#</span><span class="n">Loop</span> <span class="n">over</span> <span class="n">items</span> <span class="n">rated</span> <span class="n">by</span> <span class="n">this</span> <span class="n">user</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="n">rating</span><span class="p">)</span> <span class="n">in</span> <span class="n">userRatings</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="o">:</span>
+
+        <span class="err">#</span><span class="n">Loop</span> <span class="n">over</span> <span class="n">items</span> <span class="n">similar</span> <span class="n">to</span> <span class="n">this</span> <span class="n">one</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">similarity</span><span class="p">,</span><span class="n">item2</span><span class="p">)</span> <span class="n">in</span> <span class="n">itemMatch</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">:</span>
+
+            <span class="err">#</span><span class="n">Ignore</span> <span class="k">if</span> <span class="n">this</span> <span class="n">user</span> <span class="n">has</span> <span class="n">already</span> <span class="n">rated</span> <span class="n">this</span> <span class="n">item</span>
+            <span class="k">if</span> <span class="n">item2</span> <span class="n">in</span> <span class="n">userRatings</span><span class="o">:</span> <span class="k">continue</span>
+
+            <span class="err">#</span><span class="n">Weighted</span> <span class="n">sum</span> <span class="n">of</span> <span class="n">rating</span> <span class="n">times</span> <span class="n">similarity</span>
+            <span class="n">scores</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">item2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">scores</span><span class="p">[</span><span class="n">item2</span><span class="p">]</span><span class="o">+=</span><span class="n">similarity</span><span class="o">*</span><span class="n">rating</span>
+
+            <span class="err">#</span><span class="n">Sum</span> <span class="n">of</span> <span class="n">all</span> <span class="n">the</span> <span class="n">similarities</span>
+            <span class="n">totalSim</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">item2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">totalSim</span><span class="p">[</span><span class="n">item2</span><span class="p">]</span><span class="o">+=</span><span class="n">similarity</span>
+
+    <span class="err">#</span><span class="n">Divide</span> <span class="n">each</span> <span class="n">total</span> <span class="n">score</span> <span class="n">by</span> <span class="n">total</span> <span class="n">weighting</span> <span class="n">to</span> <span class="n">get</span> <span class="n">an</span> <span class="n">average</span>
+    <span class="n">rankings</span><span class="o">=</span><span class="p">[(</span><span class="n">score</span><span class="o">/</span><span class="n">totalSim</span><span class="p">[</span><span class="n">item</span><span class="p">],</span><span class="n">item</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="n">item</span><span class="p">,</span><span class="n">score</span> <span class="n">in</span> <span class="n">scores</span><span class="p">.</span><span class="n">items</span><span class="p">()]</span>
+
+
+    <span class="err">#</span><span class="n">Return</span> <span class="n">the</span> <span class="n">rankings</span> <span class="n">from</span> <span class="n">highest</span> <span class="n">to</span> <span class="n">lowest</span>
+    <span class="n">rankings</span><span class="p">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">rankings</span><span class="p">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rankings</span>
+</pre></div>
+
+
+<p>Now, you can calculate the item similarity dictionary, get a list of movies, and their ratings, similar to the tastes of any given user, and specific to a certain demographic!</p>
+<p>I did not actually rate these movies, so I am going to cheat and choose an arbitrary 24-year-old from this dataset – let’s say my 24-year-old friend, rater number 4, is going to hang out with my parents instead of me. The input to obtain the first 30 movie recommendations would look like this:</p>
+<div class="highlight"><pre><span class="n">itemMatch</span> <span class="o">=</span> <span class="n">calculateSimilarItems</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span>
+
+<span class="n">getRecommendedItems</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span> <span class="n">itemMatch</span><span class="p">,</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">0</span><span class="o">:</span><span class="mi">30</span><span class="p">]</span>
+</pre></div>
+
+
+<p>(I’m not going to get more specific with my parents’ age range because that would be rude.)</p>
+<p>The output would be:</p>
+<p>[(5.0, 'Temptress Moon (Feng Yue) (1996)'), (5.0, 'Shooting Fish (1997)'), (5.0, 'Letter From Death Row, A (1998)'), (5.0, 'Legal Deceit (1997)'), (5.0, 'Frankie Starlight (1995)'), (5.0, 'Convent, The (Convento, O) (1995)'), (5.0, 'Children of the Revolution (1996)'), (5.0, 'Chairman of the Board (1998)'), (4.910804627925347, 'Unhook the Stars (1996)'), (4.833333333333333, 'High School High (1996)'), (4.833333333333333, 'American Strays (1996)'), (4.818181818181818, 'Hotel de Love (1996)'), (4.7894736842105265, 'American Buffalo (1996)'), (4.749999999999999, 'Man of the House (1995)'), (4.749999999999999, 'Major Payne (1994)'), (4.749999999999999, 'Low Down Dirty Shame, A (1994)'), (4.749999999999999, 'Lightning Jack (1994)'), (4.749999999999999, 'I Love Trouble (1994)'), (4.749999999999999, 'Cops and Robbersons (1994)'), (4.737704918032787, 'Bloodsport 2 (1995)'), (4.703703703703704, 'Two Deaths (1995)'), (4.673094212473764, 'Beavis and Butt-head Do America (1996)'), (4.666666666666667, 'Young Guns II (1990)'), (4.666666666666667, 'Little City (1998)'), (4.654320987654322, 'Solo (1996)'), (4.625, 'Spice World (1997)'), (4.619052786367143, 'Wizard of Oz, The (1939)'), (4.611078667402663, 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963)'), (4.609392286807124, 'Rent-a-Kid (1995)'), (4.608348198368234, 'Babe (1995)')]</p>
+<p>You only have to create the itemMatch dict once for every age group (in fact, you can set a different variable name for different age groups if you want to come back to them), and then you can just run that second line for the specific user, and update the itemMatch dictionary if you end up entering new subjects.</p>
+<p>This could all be conducted for any demographic. You can set up the function to take a certain zip code as input, or an occupation, and thereby control the raters accounted for in the Euclidean distance score between items. </p>
+<p>I’m looking forward to inputting my own movie ratings and actually running this for myself instead of my anonymous contemporary.</p>
+<p>I hope you enjoyed this. Have a good week, everyone. </p>
+    </div>
+ 
+            </article>
+        </section>
+    </div> <!-- span -->
+</div>
+<div class="article-page">
+    <div class="span7 offset2">
+        <header class="article">
             <h2><a href="./posts/2014/03/githubpages/" rel="bookmark">Putting a Pelican blog on Github Pages</a></h2>
             <time datetime="2014-03-12T00:00:00">
                 Mar 12, 2014
@@ -72,7 +258,8 @@
     <div class="span7">
         <section>
             <article class="entry">
-    <div id="first-article">
+    <div class="article-summary">
+        <!-- show full content instead of summary -->
         <p>Hello, everyone!</p>
 <p>I'm writing up my first d3.js post right now, but I thought that I'd do a quick little post on how I 
 actually published this Pelican blog through GitHub Pages. 
@@ -280,6 +467,9 @@ This is the book I used to familiarize myself with D3. It has excellent code exa
 	<ul>
 		<li>
 			<ul>
+					<li>
+						<a href="./category/collaborative-filtering.html">Collaborative filtering</a>
+					</li>
 					<li>
 						<a href="./category/data-science.html">data science</a>
 					</li>
