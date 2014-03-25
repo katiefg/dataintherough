@@ -59,138 +59,6 @@
 <div class="article-page">
     <div class="span7 offset2">
         <header class="article">
-            <h2><a href="./posts/2014/03/choropleths/" rel="bookmark">Using choropleths to visualize poverty of minors vs. all age groups in America</a></h2>
-            <time datetime="2014-03-25T00:00:00">
-                Mar 25, 2014
-            </time>
-        </header>
-    </div>
-
-    <div class="span2">
-    </div>
-
-    <div class="span7">
-        <section>
-            <article class="entry">
-    <div id="first-article">
-        <p>I recently found this interesting dataset of <a href="http://www.census.gov/did/www/saipe/data/statecounty/data/2012.html">Small Area Income and Poverty Estimates</a>. It contains several variables concerning poverty rates across different counties in the United States. The ones I will focus on for this post are the percentage of people of all ages living in poverty, the percentage of individuals under 18 living in poverty, and the percentage of related children age 5-17 (school age) in families in poverty in 2012, which is the most recent year available. </p>
-<p>I wanted to take a look at how poverty rates differ across these age groups in various counties and I thought using choropleths might be a good way to visualize those differences. (I found out after writing this that they actually do have choropleths on the census.gov website, but they took a different approach to theirs - they are in different color schemes with different quantize scales across age group and are each on a separate page. When doing this, I opted to look at the different age groups in the same color scheme, with the same quantize scale, next to one another, as I wanted to compare the groups.)</p>
-<p>I am going to use this <a href="http://bl.ocks.org/mbostock/4060606">choropleth</a> designed by <a href="http://bost.ocks.org/mike/">Mike Bostock</a>, which I really liked for this purpose. I’m just going to make a few small modifications – swapping out the blue and green values in the color scheme (just for experimentation’s sake) and adding a black background since some of the lower values in this particular dataset end up getting washed out in the white, especially around the coastal areas. Oh, and clearly the data I use will be different!</p>
-<p>The dataset also gave the national rate and the 90% confidence interval, so I’ll pass that along here.</p>
-<p>Percentage of people in poverty, all ages: National rate: 15.9%; 90% confidence interval: 15.8%-16%</p>
-<p><img alt="Key" src="/static/povertypercent_allages.jpg" /></p>
-<p>Percentage of children under age 18 in poverty: National rate: 22.6%; 90% confidence interval: 22.4% - 22.8%</p>
-<p><img alt="Key" src="/static/povertypercent_under18.jpg" /></p>
-<p>Percentage of related children 5-17 years old in families in poverty: National rate: 21%; 90% confidence interval: 20.8% - 21.2%</p>
-<p><img alt="Key" src="/static/povertypercent_517infam.jpg" /></p>
-<p>My first impression is that the rates look higher in the graphs containing the minors. It looks to me like there are more dark patches in those maps, particularly the under-18 one. I couldn’t really say anything conclusively yet so I decided to do some really simple statistics to see if my impression of an overall increase in poverty rates for younger populations according to this data might be correct.</p>
-<p>First I got a mean and standard deviation, and ran a Shapiro-Wilk test to see if the data was normally distributed. The stats.shapiro command in SciPy returns a test statistic followed by a p-value. </p>
-<div class="highlight"><pre><span class="n">import</span> <span class="n">scipy</span> <span class="n">as</span> <span class="n">sp</span>
-<span class="n">from</span> <span class="n">scipy</span> <span class="n">import</span> <span class="n">stats</span>
-<span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
-<span class="n">import</span> <span class="n">pandas</span> <span class="n">as</span> <span class="n">pd</span>
-<span class="n">from</span> <span class="n">pandas</span> <span class="n">import</span> <span class="n">read_csv</span>
-
-<span class="n">pov</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="s">&quot;poverty_comparison.csv&quot;</span><span class="p">)</span>
-
-<span class="cp">#these are these arrays from the csv corresponding to each group, </span>
-<span class="cp">#in order of county id </span>
-<span class="n">pov18</span> <span class="o">=</span> <span class="n">pov</span><span class="p">[</span><span class="s">&quot;pov18&quot;</span><span class="p">]</span>
-<span class="n">pov517</span> <span class="o">=</span> <span class="n">pov</span><span class="p">[</span><span class="s">&quot;pov517&quot;</span><span class="p">]</span>
-<span class="n">povall</span> <span class="o">=</span> <span class="n">pov</span><span class="p">[</span><span class="s">&quot;povall&quot;</span><span class="p">]</span>
-
-<span class="n">print</span> <span class="s">&quot;under 18:&quot;</span>
-<span class="n">print</span> <span class="s">&quot;mean:&quot;</span>
-<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pov18</span><span class="p">)</span>
-<span class="n">print</span> <span class="s">&quot;standard deviation:&quot;</span>
-<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">pov18</span><span class="p">)</span>
-<span class="n">print</span> <span class="s">&quot;shapiro-wilk:&quot;</span>
-<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">shapiro</span><span class="p">(</span><span class="n">pov18</span><span class="p">)</span>
-
-<span class="n">print</span> <span class="s">&quot;5-17&quot;</span>
-<span class="n">print</span> <span class="s">&quot;mean:&quot;</span>
-<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pov517</span><span class="p">)</span>
-<span class="n">print</span> <span class="s">&quot;standard deviation:&quot;</span>
-<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">pov517</span><span class="p">)</span>
-<span class="n">print</span> <span class="s">&quot;shapiro-wilk:&quot;</span>
-<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">shapiro</span><span class="p">(</span><span class="n">pov517</span><span class="p">)</span>
-
-<span class="n">print</span> <span class="s">&quot;all ages:&quot;</span>
-<span class="n">print</span> <span class="s">&quot;mean:&quot;</span>
-<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">povall</span><span class="p">)</span>
-<span class="n">print</span> <span class="s">&quot;standard deviation:&quot;</span>
-<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">povall</span><span class="p">)</span>
-<span class="n">print</span> <span class="s">&quot;shapiro-wilk:&quot;</span>
-<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">shapiro</span><span class="p">(</span><span class="n">povall</span><span class="p">)</span>
-</pre></div>
-
-
-<p>That code returned the following (plus some white space for clarity):</p>
-<div class="highlight"><pre><span class="n">under</span> <span class="mi">18</span><span class="o">:</span>
-<span class="nl">mean:</span>
-<span class="mf">24.4720325712</span>
-<span class="n">standard</span> <span class="n">deviation</span><span class="o">:</span>
-<span class="mf">9.16095304016</span>
-<span class="n">shapiro</span><span class="o">-</span><span class="n">wilk</span><span class="o">:</span>
-<span class="p">(</span><span class="mf">0.9813428521156311</span><span class="p">,</span> <span class="mf">4.322406441501704e-20</span><span class="p">)</span>
-
-<span class="mi">5</span><span class="o">-</span><span class="mi">17</span> <span class="n">in</span> <span class="n">fam</span><span class="o">:</span>
-<span class="nl">mean:</span>
-<span class="mf">22.5717507047</span>
-<span class="n">standard</span> <span class="n">deviation</span><span class="o">:</span>
-<span class="mf">8.89065270826</span>
-<span class="n">shapiro</span><span class="o">-</span><span class="n">wilk</span><span class="o">:</span>
-<span class="p">(</span><span class="mf">0.9775098562240601</span><span class="p">,</span> <span class="mf">4.492177891111914e-22</span><span class="p">)</span>
-
-<span class="n">all</span> <span class="n">ages</span><span class="o">:</span>
-<span class="nl">mean:</span>
-<span class="mf">17.1698089571</span>
-<span class="n">standard</span> <span class="n">deviation</span><span class="o">:</span>
-<span class="mf">6.53900364074</span>
-<span class="n">shapiro</span><span class="o">-</span><span class="n">wilk</span><span class="o">:</span>
-<span class="p">(</span><span class="mf">0.9511524438858032</span><span class="p">,</span> <span class="mf">2.216994805890953e-31</span><span class="p">)</span>
-</pre></div>
-
-
-<p>You can see that these groups are not normally distributed (I also tried with log transforms of the data – still not normal). </p>
-<p>So I just used the Wilcoxon signed-rank test, which is a nonparametric paired difference test, to look at the differences between the samples:
-The code: </p>
-<div class="highlight"><pre><span class="n">print</span> <span class="s">&quot;wilcoxon: under18 and 5-17:&quot;</span>
-<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">pov18</span><span class="p">,</span><span class="n">pov517</span><span class="p">)</span>
-
-<span class="n">print</span> <span class="s">&quot;wilcoxon: under18 and all ages:&quot;</span>
-<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">pov18</span><span class="p">,</span><span class="n">povall</span><span class="p">)</span>
-
-<span class="n">print</span> <span class="s">&quot;wilcoxon: 5-17 and all ages:&quot;</span>
-<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">povall</span><span class="p">,</span><span class="n">pov517</span><span class="p">)</span>
-</pre></div>
-
-
-<p>Returned the following:</p>
-<div class="highlight"><pre><span class="n">wilcoxon</span><span class="o">:</span> <span class="n">under18</span> <span class="n">and</span> <span class="mi">5</span><span class="o">-</span><span class="mi">17</span><span class="o">:</span>
-<span class="o">(</span><span class="mf">33434.5</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
-
-<span class="n">wilcoxon</span><span class="o">:</span> <span class="n">under18</span> <span class="n">and</span> <span class="n">all</span> <span class="n">ages</span><span class="o">:</span>
-<span class="o">(</span><span class="mf">30549.5</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
-
-<span class="n">wilcoxon</span><span class="o">:</span> <span class="mi">5</span><span class="o">-</span><span class="mi">17</span> <span class="n">and</span> <span class="n">all</span> <span class="n">ages</span><span class="o">:</span>
-<span class="o">(</span><span class="mf">81849.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
-</pre></div>
-
-
-<p>Looks like my impression generated from the graphs were overall on the right track. According to this test, the overall poverty rates for individuals under 18 are significantly higher than both the all-ages group and the related 5-17-year-olds in families in poverty group, and the 5-17 group has significantly higher rates than the all-ages group.</p>
-<p>Of course, this test does not differentially weight the different population sizes of the different counties, so that’s a disadvantage of my very basic approach here. Also, since the groups are overlapping, I think it would have been a good idea to compare the non-overlapping proportions of the groups, but I do not presently have those numbers. 
-It would be interesting to see a plot of p-values when comparing two of the groups. Unfortunately, as I do not know how the data is distributed within the individual county groups I don't know what tests I should run. If anyone has an idea for how to work around this, I'm open to recommendations. I'd be interested to create a p-values choropleth in the future.
-I also know there are certain disadvantages to using choropleths in general, such as the amount of space a certain area has to represent it being governed by geographical rather than population size. However, I think that the choropleth in this case does convey the right general impression, which is that minors were disproportionately affected by poverty in America in 2012 according to this data.</p>
-    </div>
- 
-            </article>
-        </section>
-    </div> <!-- span -->
-</div>
-<div class="article-page">
-    <div class="span7 offset2">
-        <header class="article">
             <h2><a href="./posts/2014/03/collaborative_filtering/" rel="bookmark">Collaborative item-based filtering for specific demographics</a></h2>
             <time datetime="2014-03-21T00:00:00">
                 Mar 21, 2014
@@ -204,8 +72,7 @@ I also know there are certain disadvantages to using choropleths in general, suc
     <div class="span7">
         <section>
             <article class="entry">
-    <div class="article-summary">
-        <!-- show full content instead of summary -->
+    <div id="first-article">
         <p>This post is inspired by a situation I find myself in sometimes – going back home every year or so and deciding on movies to watch with my parents. I’ve lived on the opposite coast from them for about 6 years, so I don’t have a lot of data about their movie preferences as of late. Making them fill out a movie survey would be time consuming for them. I do know other things about them, though! I know their ages, I know their jobs, I know where they live. I also, obviously, have a lot of data about my own movie preferences. What if I could combine my movie preferences with their demographic info to get some recommendations for what movies we might want to watch together? </p>
 <p>I am going to show you how to do this by adapting an algorithm from the book Programming Collective Intelligence: Building Smart Web 2.0 Applications by Toby Segaran. (Copyright 2007 Toby Segaran, 978-0-596-52932-1)</p>
 <p>Segaran describes collaborative item-based filtering. He uses the Euclidean distance score  to find out how similar films are to one another, and which films are most similar to the films that someone rates highly.</p>
@@ -600,9 +467,6 @@ This is the book I used to familiarize myself with D3. It has excellent code exa
 	<ul>
 		<li>
 			<ul>
-					<li>
-						<a href="./category/choropleths.html">Choropleths</a>
-					</li>
 					<li>
 						<a href="./category/collaborative-filtering.html">Collaborative filtering</a>
 					</li>
