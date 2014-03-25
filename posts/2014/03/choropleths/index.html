@@ -96,11 +96,11 @@
 <p>I am going to use this <a href="http://bl.ocks.org/mbostock/4060606">choropleth</a> designed by <a href="http://bost.ocks.org/mike/">Mike Bostock</a>, which I really liked for this purpose. I’m just going to make a few small modifications – swapping out the blue and green values in the color scheme (just for experimentation’s sake) and adding a black background since some of the lower values in this particular dataset end up getting washed out in the white, especially around the coastal areas. Oh, and clearly the data I use will be different!</p>
 <p>The dataset also gave the national rate and the 90% confidence interval, so I’ll pass that along here.</p>
 <p>Percentage of people in poverty, all ages: National rate: 15.9%; 90% confidence interval: 15.8%-16%</p>
-<p><img alt="Key" src="images/povertypercent_allages.jpg" /></p>
+<p><img alt="Key" src="/static/povertypercent_allages.jpg" /></p>
 <p>Percentage of children under age 18 in poverty: National rate: 22.6%; 90% confidence interval: 22.4% - 22.8%</p>
-<p><img alt="Key" src="images/povertypercent_under18.jpg" /></p>
+<p><img alt="Key" src="/static/povertypercent_under18.jpg" /></p>
 <p>Percentage of related children 5-17 years old in families in poverty: National rate: 21%; 90% confidence interval: 20.8% - 21.2%</p>
-<p><img alt="Key" src="images/povertypercent_517infam.jpg" /></p>
+<p><img alt="Key" src="/static/povertypercent_517infam.jpg" /></p>
 <p>My first impression is that the rates look higher in the graphs containing the minors. It looks to me like there are more dark patches in those maps, particularly the under-18 one. I couldn’t really say anything conclusively yet so I decided to do some really simple statistics to see if my impression of an overall increase in poverty rates for younger populations according to this data might be correct.</p>
 <p>First I got a mean and standard deviation, and ran a Shapiro-Wilk test to see if the data was normally distributed. The stats.shapiro command in SciPy returns a test statistic followed by a p-value. </p>
 <div class="highlight"><pre><span class="n">import</span> <span class="n">scipy</span> <span class="n">as</span> <span class="n">sp</span>
