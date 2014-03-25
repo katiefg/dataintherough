@@ -153,7 +153,7 @@
 
 
 <p>You can see that these groups are not normally distributed (I also tried with log transforms of the data – still not normal). </p>
-<p>So I just used the Wilcoxon signed-rank test, which is a nonparametric paired difference test, to look at the differences between the samples:
+<p>So I just used the Wilcoxon signed-rank test, which is a nonparametric paired difference test, to look at the differences between the samples.
 The code: </p>
 <div class="highlight"><pre><span class="n">print</span> <span class="s">&quot;wilcoxon: under18 and 5-17:&quot;</span>
 <span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">pov18</span><span class="p">,</span><span class="n">pov517</span><span class="p">)</span>
