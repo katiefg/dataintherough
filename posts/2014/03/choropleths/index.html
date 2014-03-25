@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Using choropleths to visualize poverty of minors vs. all age groups in America / Data in the Rough</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="shortcut icon" href="../../../../theme/favicon.ico" />
+        <link rel="apple-touch-icon" href="../../../../theme/apple-touch-icon-iphone.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="../../../../theme/apple-touch-icon-ipad.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="../../../../theme/apple-touch-icon-iphone4.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="../../../../theme/apple-touch-icon-ipad3.png" />
+
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="../../../../theme/css/font-awesome.min.css">
+        <link rel="stylesheet" href="../../../../theme/css/colorbox.css">
+
+        <link rel="stylesheet" href="../../../../theme/css/main.css">
+
+        <script src="../../../../theme/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="row">
+                <div class="span9">
+                    <div class="row">
+                    
+
+                        <div class="span7"> <!-- header -->
+                            <!--[if lt IE 9]>
+                                <p class="chromeframe alert alert-warning">You are using an <strong>outdated</strong> browser, and this site might not look best in it. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+                            <![endif]-->
+                            <header id="site-header">
+                                <div id="site-header-content">
+                                    <h1>
+                                        <a href="../../../..">Data in the Rough</a>
+                                        <small>
+                                            <span class="divider">/</span> Exploring data science and visualization
+                                        </small>
+                                    </h1>
+                                    <p>
+                                        
+                                    </p>
+                                </div>
+                            </header>
+                        </div> <!-- header span -->
+                    </div> <!-- header row -->
+
+                    <div class="row"> <!-- content -->
+                        <div class="content">
+<div class="article-page">
+    <div class="span7 offset2">
+        <header class="article">
+            <h2><a href="../../../../posts/2014/03/choropleths/" rel="bookmark">Using choropleths to visualize poverty of minors vs. all age groups in America</a></h2>
+            <time datetime="2014-03-25T00:00:00">
+                Mar 25, 2014
+            </time>
+        </header>
+    </div>
+
+    <div class="span2">
+    <div class="article-meta article-meta-border">
+        <dl class="dl-horizontal">
+            <dt><i class="icon-file"></i></dt>
+            <dd>
+                <a href="../../../../category/choropleths.html">
+                    Choropleths
+                </a>
+            </dd>
+
+            <dt><i class="icon-tags"></i></dt>
+            <dd>
+                    <a href="../../../../tag/d3js.html">d3.js</a>
+<span class="separator">/</span>                    <a href="../../../../tag/choropleths.html">choropleths</a>
+<span class="separator">/</span>                    <a href="../../../../tag/scipy.html">scipy</a>
+            </dd>
+        </dl>
+
+        <b class="border-notch notch"></b>
+        <b class="notch"></b>
+    </div>
+    </div>
+
+    <div class="span7">
+        <section>
+            <article class="entry">
+    <p>I recently found this interesting dataset of <a href="http://www.census.gov/did/www/saipe/data/statecounty/data/2012.html">Small Area Income and Poverty Estimates</a>. It contains several variables concerning poverty rates across different counties in the United States. The ones I will focus on for this post are the percentage of people of all ages living in poverty, the percentage of individuals under 18 living in poverty, and the percentage of related children age 5-17 (school age) in families in poverty in 2012, which is the most recent year available. </p>
+<p>I wanted to take a look at how poverty rates differ across these age groups in various counties and I thought using choropleths might be a good way to visualize those differences. (I found out after writing this that they actually do have choropleths on the census.gov website, but they took a different approach to theirs - they are in different color schemes with different quantize scales across age group and are each on a separate page. When doing this, I opted to look at the different age groups in the same color scheme, with the same quantize scale, next to one another, as I wanted to compare the groups.)</p>
+<p>I am going to use this <a href="http://bl.ocks.org/mbostock/4060606">choropleth</a> designed by <a href="http://bost.ocks.org/mike/">Mike Bostock</a>, which I really liked for this purpose. I’m just going to make a few small modifications – swapping out the blue and green values in the color scheme (just for experimentation’s sake) and adding a black background since some of the lower values in this particular dataset end up getting washed out in the white, especially around the coastal areas. Oh, and clearly the data I use will be different!</p>
+<p>The dataset also gave the national rate and the 90% confidence interval, so I’ll pass that along here.</p>
+<p>Percentage of people in poverty, all ages: National rate: 15.9%; 90% confidence interval: 15.8%-16%</p>
+<p><img alt="Key" src="images/povertypercent_allages.jpg" /></p>
+<p>Percentage of children under age 18 in poverty: National rate: 22.6%; 90% confidence interval: 22.4% - 22.8%</p>
+<p><img alt="Key" src="images/povertypercent_under18.jpg" /></p>
+<p>Percentage of related children 5-17 years old in families in poverty: National rate: 21%; 90% confidence interval: 20.8% - 21.2%</p>
+<p><img alt="Key" src="images/povertypercent_517infam.jpg" /></p>
+<p>My first impression is that the rates look higher in the graphs containing the minors. It looks to me like there are more dark patches in those maps, particularly the under-18 one. I couldn’t really say anything conclusively yet so I decided to do some really simple statistics to see if my impression of an overall increase in poverty rates for younger populations according to this data might be correct.</p>
+<p>First I got a mean and standard deviation, and ran a Shapiro-Wilk test to see if the data was normally distributed. The stats.shapiro command in SciPy returns a test statistic followed by a p-value. </p>
+<div class="highlight"><pre><span class="n">import</span> <span class="n">scipy</span> <span class="n">as</span> <span class="n">sp</span>
+<span class="n">from</span> <span class="n">scipy</span> <span class="n">import</span> <span class="n">stats</span>
+<span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
+<span class="n">import</span> <span class="n">pandas</span> <span class="n">as</span> <span class="n">pd</span>
+<span class="n">from</span> <span class="n">pandas</span> <span class="n">import</span> <span class="n">read_csv</span>
+
+<span class="n">pov</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="s">&quot;poverty_comparison.csv&quot;</span><span class="p">)</span>
+
+<span class="cp">#these are these arrays from the csv corresponding to each group, </span>
+<span class="cp">#in order of county id </span>
+<span class="n">pov18</span> <span class="o">=</span> <span class="n">pov</span><span class="p">[</span><span class="s">&quot;pov18&quot;</span><span class="p">]</span>
+<span class="n">pov517</span> <span class="o">=</span> <span class="n">pov</span><span class="p">[</span><span class="s">&quot;pov517&quot;</span><span class="p">]</span>
+<span class="n">povall</span> <span class="o">=</span> <span class="n">pov</span><span class="p">[</span><span class="s">&quot;povall&quot;</span><span class="p">]</span>
+
+<span class="n">print</span> <span class="s">&quot;under 18:&quot;</span>
+<span class="n">print</span> <span class="s">&quot;mean:&quot;</span>
+<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pov18</span><span class="p">)</span>
+<span class="n">print</span> <span class="s">&quot;standard deviation:&quot;</span>
+<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">pov18</span><span class="p">)</span>
+<span class="n">print</span> <span class="s">&quot;shapiro-wilk:&quot;</span>
+<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">shapiro</span><span class="p">(</span><span class="n">pov18</span><span class="p">)</span>
+
+<span class="n">print</span> <span class="s">&quot;5-17&quot;</span>
+<span class="n">print</span> <span class="s">&quot;mean:&quot;</span>
+<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pov517</span><span class="p">)</span>
+<span class="n">print</span> <span class="s">&quot;standard deviation:&quot;</span>
+<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">pov517</span><span class="p">)</span>
+<span class="n">print</span> <span class="s">&quot;shapiro-wilk:&quot;</span>
+<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">shapiro</span><span class="p">(</span><span class="n">pov517</span><span class="p">)</span>
+
+<span class="n">print</span> <span class="s">&quot;all ages:&quot;</span>
+<span class="n">print</span> <span class="s">&quot;mean:&quot;</span>
+<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">povall</span><span class="p">)</span>
+<span class="n">print</span> <span class="s">&quot;standard deviation:&quot;</span>
+<span class="n">print</span> <span class="n">np</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">povall</span><span class="p">)</span>
+<span class="n">print</span> <span class="s">&quot;shapiro-wilk:&quot;</span>
+<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">shapiro</span><span class="p">(</span><span class="n">povall</span><span class="p">)</span>
+</pre></div>
+
+
+<p>That code returned the following (plus some white space for clarity):</p>
+<div class="highlight"><pre><span class="n">under</span> <span class="mi">18</span><span class="o">:</span>
+<span class="nl">mean:</span>
+<span class="mf">24.4720325712</span>
+<span class="n">standard</span> <span class="n">deviation</span><span class="o">:</span>
+<span class="mf">9.16095304016</span>
+<span class="n">shapiro</span><span class="o">-</span><span class="n">wilk</span><span class="o">:</span>
+<span class="p">(</span><span class="mf">0.9813428521156311</span><span class="p">,</span> <span class="mf">4.322406441501704e-20</span><span class="p">)</span>
+
+<span class="mi">5</span><span class="o">-</span><span class="mi">17</span> <span class="n">in</span> <span class="n">fam</span><span class="o">:</span>
+<span class="nl">mean:</span>
+<span class="mf">22.5717507047</span>
+<span class="n">standard</span> <span class="n">deviation</span><span class="o">:</span>
+<span class="mf">8.89065270826</span>
+<span class="n">shapiro</span><span class="o">-</span><span class="n">wilk</span><span class="o">:</span>
+<span class="p">(</span><span class="mf">0.9775098562240601</span><span class="p">,</span> <span class="mf">4.492177891111914e-22</span><span class="p">)</span>
+
+<span class="n">all</span> <span class="n">ages</span><span class="o">:</span>
+<span class="nl">mean:</span>
+<span class="mf">17.1698089571</span>
+<span class="n">standard</span> <span class="n">deviation</span><span class="o">:</span>
+<span class="mf">6.53900364074</span>
+<span class="n">shapiro</span><span class="o">-</span><span class="n">wilk</span><span class="o">:</span>
+<span class="p">(</span><span class="mf">0.9511524438858032</span><span class="p">,</span> <span class="mf">2.216994805890953e-31</span><span class="p">)</span>
+</pre></div>
+
+
+<p>You can see that these groups are not normally distributed (I also tried with log transforms of the data – still not normal). </p>
+<p>So I just used the Wilcoxon signed-rank test, which is a nonparametric paired difference test, to look at the differences between the samples:
+The code: </p>
+<div class="highlight"><pre><span class="n">print</span> <span class="s">&quot;wilcoxon: under18 and 5-17:&quot;</span>
+<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">pov18</span><span class="p">,</span><span class="n">pov517</span><span class="p">)</span>
+
+<span class="n">print</span> <span class="s">&quot;wilcoxon: under18 and all ages:&quot;</span>
+<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">pov18</span><span class="p">,</span><span class="n">povall</span><span class="p">)</span>
+
+<span class="n">print</span> <span class="s">&quot;wilcoxon: 5-17 and all ages:&quot;</span>
+<span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">povall</span><span class="p">,</span><span class="n">pov517</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Returned the following:</p>
+<div class="highlight"><pre><span class="n">wilcoxon</span><span class="o">:</span> <span class="n">under18</span> <span class="n">and</span> <span class="mi">5</span><span class="o">-</span><span class="mi">17</span><span class="o">:</span>
+<span class="o">(</span><span class="mf">33434.5</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
+
+<span class="n">wilcoxon</span><span class="o">:</span> <span class="n">under18</span> <span class="n">and</span> <span class="n">all</span> <span class="n">ages</span><span class="o">:</span>
+<span class="o">(</span><span class="mf">30549.5</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
+
+<span class="n">wilcoxon</span><span class="o">:</span> <span class="mi">5</span><span class="o">-</span><span class="mi">17</span> <span class="n">and</span> <span class="n">all</span> <span class="n">ages</span><span class="o">:</span>
+<span class="o">(</span><span class="mf">81849.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Looks like my impression generated from the graphs were overall on the right track. According to this test, the overall poverty rates for individuals under 18 are significantly higher than both the all-ages group and the related 5-17-year-olds in families in poverty group, and the 5-17 group has significantly higher rates than the all-ages group.</p>
+<p>Of course, this test does not differentially weight the different population sizes of the different counties, so that’s a disadvantage of my very basic approach here. Also, since the groups are overlapping, I think it would have been a good idea to compare the non-overlapping proportions of the groups, but I do not presently have those numbers. 
+It would be interesting to see a plot of p-values when comparing two of the groups. Unfortunately, as I do not know how the data is distributed within the individual county groups I don't know what tests I should run. If anyone has an idea for how to work around this, I'm open to recommendations. I'd be interested to create a p-values choropleth in the future.
+I also know there are certain disadvantages to using choropleths in general, such as the amount of space a certain area has to represent it being governed by geographical rather than population size. However, I think that the choropleth in this case does convey the right general impression, which is that minors were disproportionately affected by poverty in America in 2012 according to this data.</p>
+
+            </article>
+        </section>
+    </div> <!-- span -->
+</div>                        </div>
+                    </div> <!-- content row -->
+
+                    <div class="row"> <!-- footer -->
+                        <div class="span7 offset2">
+                            <footer id="site-footer">
+                                <p>
+                                    <a href="" target="_blank">
+                                        
+                                    </a> Katie Green /
+                                    <a href="../../../../">Archives</a>
+                                </p>
+                                <p>
+                                    Powered by
+                                    <a href="https://github.com/getpelican/pelican" target="_blank">
+                                        Pelican
+                                    </a>
+                                    /
+                                    Source code on
+                                    <a href="http://github.com/siovene/iovene.com" target="blank">
+                                        GitHub
+                                    </a>
+                                    /
+                                    Theme <code>Lannisport</code>, also on
+                                    <a href="http://github.com/siovene/lannisport" target="_blank">
+                                        GitHub
+                                    </a>
+                                </p>
+                            </footer>
+                        </div> <!-- footer span -->
+                    </div> <!-- footer row -->
+                </div> <!-- header+content+footer span -->
+
+                <div class="span3">
+                    <aside class="affix">
+                        <div id="sidebar">
+                            <div id="social-icons">
+                                    <span class="social-icon">
+                                        <a href="http://www.linkedin.com/pub/katie-green/12/651/70a" target="_blank" title="LinkedIn">
+                                            <i class="icon-linkedin"></i>
+                                        </a>
+                                    </span>
+                                    <span class="social-icon">
+                                        <a href="https://twitter.com/katie_fg" target="_blank" title="Twitter">
+                                            <i class="icon-twitter"></i>
+                                        </a>
+                                    </span>
+                            </div>
+
+                            <div id="navigation">
+<nav>
+	<h2>Pages</h2>
+	<ul>
+		<li>
+			<ul>
+				<li>
+					<a href="../../../..">Blog</a>
+				</li>
+
+					<li>
+						<a href="../../../../pages/about.html">About</a>
+					</li>
+					<li>
+						<a href="../../../../pages/blogs.html">Links and blogs</a>
+					</li>
+					<li>
+						<a href="../../../../pages/contact.html">Contact</a>
+					</li>
+					<li>
+						<a href="../../../../pages/license.html">License</a>
+					</li>
+			</ul>
+		</li>
+	</ul>
+</nav>
+
+<nav>
+	<h2>Categories</h2>
+	<ul>
+		<li>
+			<ul>
+					<li>
+						<a href="../../../../category/choropleths.html">Choropleths</a>
+					</li>
+					<li>
+						<a href="../../../../category/collaborative-filtering.html">Collaborative filtering</a>
+					</li>
+					<li>
+						<a href="../../../../category/data-science.html">data science</a>
+					</li>
+					<li>
+						<a href="../../../../category/pelican-blogging.html">Pelican blogging</a>
+					</li>
+			</ul>
+		</li>
+	</ul>
+</nav>                            </div>
+                        </div> <!-- sidebar -->
+
+                        <p id="back-to-top">
+                            <a href="#">
+                                <i class="icon-double-angle-up"></i> Back to top
+                            </a>
+                        </p>
+
+                    </aside>
+                </div> <!-- logo+navigation span -->
+            </div> <!-- row -->
+
+        </div> <!-- /container -->
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="../../../../theme/js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
+        <script>$('body').popover || document.write('<script src="../../../../theme/js/vendor/bootstrap.min.js"><\/script>')</script>
+
+        <script src="../../../../theme/js/jquery.captions.js"></script>
+        <script src="../../../../theme/js/vendor/jquery.colorbox-min.js"></script>
+
+        <script src="../../../../theme/js/main.js"></script>
+
+        <script>
+            var _gaq=[['_setAccount',''],['_trackPageview'],['_trackPageLoadTime'],['_gat._anonymizeIp']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
