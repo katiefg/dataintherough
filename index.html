@@ -74,7 +74,7 @@
             <article class="entry">
     <div id="first-article">
         <p>I recently found this interesting dataset of <a href="http://www.census.gov/did/www/saipe/data/statecounty/data/2012.html">Small Area Income and Poverty Estimates</a>. It contains several variables concerning poverty rates across different counties in the United States. The ones I will focus on for this post are the percentage of people of all ages living in poverty, the percentage of individuals under 18 living in poverty, and the percentage of related children age 5-17 (school age) in families in poverty in 2012, which is the most recent year available. </p>
-<p>I wanted to take a look at how poverty rates differ across these age groups in various counties and I thought using choropleths might be a good way to visualize those differences. (I found out after writing this that they actually do have choropleths on the census.gov website, but they took a different approach to theirs - they are in different color schemes with different quantize scales across age group and are each on a separate page. When doing this, I opted to look at the different age groups in the same color scheme, with the same quantize scale, next to one another, as I wanted to compare the groups.)</p>
+<p>I want to take a look at how poverty rates differ across these age groups in various counties and I thought using choropleths might be a good way to visualize those differences. (I found out after writing this that they actually do have choropleths on the census.gov website, but they took a different approach to theirs - they are in different color schemes with different quantize scales across age group and are each on a separate page. When doing this, I opted to look at the different age groups in the same color scheme, with the same quantize scale, next to one another, as I wanted to compare the groups.)</p>
 <p>I am going to use this <a href="http://bl.ocks.org/mbostock/4060606">choropleth</a> designed by <a href="http://bost.ocks.org/mike/">Mike Bostock</a>, which I really liked for this purpose. I’m just going to make a few small modifications – swapping out the blue and green values in the color scheme (just for experimentation’s sake) and adding a black background since some of the lower values in this particular dataset end up getting washed out in the white, especially around the coastal areas. Oh, and clearly the data I use will be different!</p>
 <p>The dataset also gave the national rate and the 90% confidence interval, so I’ll pass that along here.</p>
 <p>Percentage of people in poverty, all ages: National rate: 15.9%; 90% confidence interval: 15.8%-16%</p>
@@ -83,8 +83,8 @@
 <p><img alt="Key" src="static/povertypercent_under18.jpg" /></p>
 <p>Percentage of related children 5-17 years old in families in poverty: National rate: 21%; 90% confidence interval: 20.8% - 21.2%</p>
 <p><img alt="Key" src="static/povertypercent_517infam.jpg" /></p>
-<p>My first impression is that the rates look higher in the graphs containing the minors. It looks to me like there are more dark patches in those maps, particularly the under-18 one. I couldn’t really say anything conclusively yet so I decided to do some really simple statistics to see if my impression of an overall increase in poverty rates for younger populations according to this data might be correct.</p>
-<p>First I got a mean and standard deviation, and ran a Shapiro-Wilk test to see if the data was normally distributed. The stats.shapiro command in SciPy returns a test statistic followed by a p-value. </p>
+<p>My first impression is that the rates look higher in the graphs containing the minors. It looks to me like there are more dark patches in those maps, particularly the under-18 one. I can’t really say anything conclusively yet so I'll do some really simple statistics to see if my impression of an overall increase in poverty rates for younger populations according to this data might be correct.</p>
+<p>First I get a mean and standard deviation, and run a Shapiro-Wilk test to see if the data is normally distributed. The stats.shapiro command in SciPy returns a test statistic followed by a p-value. </p>
 <div class="highlight"><pre><span class="n">import</span> <span class="n">scipy</span> <span class="n">as</span> <span class="n">sp</span>
 <span class="n">from</span> <span class="n">scipy</span> <span class="n">import</span> <span class="n">stats</span>
 <span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
@@ -125,7 +125,7 @@
 </pre></div>
 
 
-<p>That code returned the following (plus some white space for clarity):</p>
+<p>That code returns the following (plus some white space for clarity):</p>
 <div class="highlight"><pre><span class="n">under</span> <span class="mi">18</span><span class="o">:</span>
 <span class="nl">mean:</span>
 <span class="mf">24.4720325712</span>
@@ -153,7 +153,7 @@
 
 
 <p>You can see that these groups are not normally distributed (I also tried with log transforms of the data – still not normal). </p>
-<p>So I just used the Wilcoxon signed-rank test, which is a nonparametric paired difference test, to look at the differences between the samples.
+<p>So I just use the Wilcoxon signed-rank test, which is a nonparametric paired difference test, to look at the differences between the samples.
 The code: </p>
 <div class="highlight"><pre><span class="n">print</span> <span class="s">&quot;wilcoxon: under18 and 5-17:&quot;</span>
 <span class="n">print</span> <span class="n">stats</span><span class="p">.</span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">pov18</span><span class="p">,</span><span class="n">pov517</span><span class="p">)</span>
@@ -166,7 +166,7 @@ The code: </p>
 </pre></div>
 
 
-<p>Returned the following:</p>
+<p>Returns the following:</p>
 <div class="highlight"><pre><span class="n">wilcoxon</span><span class="o">:</span> <span class="n">under18</span> <span class="n">and</span> <span class="mi">5</span><span class="o">-</span><span class="mi">17</span><span class="o">:</span>
 <span class="o">(</span><span class="mf">33434.5</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">)</span>
 
