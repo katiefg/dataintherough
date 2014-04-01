@@ -59,6 +59,217 @@
 <div class="article-page">
     <div class="span7 offset2">
         <header class="article">
+            <h2><a href="./posts/2014/04/agegenrerating/" rel="bookmark">Visualizing movie ratings across age and genre using d3.js</a></h2>
+            <time datetime="2014-04-01T00:00:00">
+                Apr 01, 2014
+            </time>
+        </header>
+    </div>
+
+    <div class="span2">
+    </div>
+
+    <div class="span7">
+        <section>
+            <article class="entry">
+    <div id="first-article">
+        <p>How do people of different ages rate different genres of film?</p>
+<p>When I looked at the MovieLens dataset from GroupLens Research at the University of Minnesota, this question sprang to my mind. I wanted to be able to have a line graph of all the different raters’ ages by ratings, but also to have a different graph for each genre, and I wanted users to be able to switch between each graph.</p>
+<p>Luckily for me, Mike Bostock already had an example of a <a href="http://bl.ocks.org/mbostock/3883245">line graph</a> and I used that as the jumping-off point for a visualization of ratings by age in different genres.</p>
+<p><a href="http://bl.ocks.org/katiefg/9913899">Here’s the block for my new chart.</a> </p>
+<p>I made a few modifications like changing the size to accommodate a drop-down menu, and changing the labels. I then added a dropdown menu with all the different genres set as the values. These values are also the column headers in my csv.  </p>
+<p>I also used different bundle interpolation values on multiple lines because I wanted to look at multiple tension parameters. I used tension parameters between .05 (that’s the bluest line) and 1(that’s the greenest line). I wanted to depict the general trends while still capturing some of the variance between age groups. </p>
+<p>Then, all I had to do was set up an event listener for switching the item in the drop-down menu:</p>
+<div class="highlight"><pre><span class="n">d3</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;select&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">&quot;change&quot;</span><span class="p">,</span> <span class="n">change</span><span class="p">);</span>
+</pre></div>
+
+
+<p>And set up that change function to change the column in the csv:</p>
+<div class="highlight"><pre><span class="kd">function</span> <span class="nx">change</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+    <span class="nx">d3</span><span class="p">.</span><span class="nx">csv</span><span class="p">(</span><span class="s2">&quot;age_genre.csv&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="nx">data</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">d</span><span class="p">.</span><span class="nx">age</span>  <span class="o">=</span> <span class="o">+</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">;</span>
+            <span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span> <span class="o">=</span> <span class="o">+</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">;</span>
+        <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line05</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">05</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line15</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">15</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line25</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">25</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line35</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">35</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line45</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">45</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line55</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">55</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line65</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">65</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line75</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">75</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line85</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">85</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line95</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(.</span><span class="mi">95</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line10</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">tension</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+
+    <span class="nx">y</span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">extent</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">;</span> <span class="p">}))</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line05&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line05&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line05</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line15&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line15&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line15</span><span class="p">);</span>
+
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line25&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line25&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line25</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line35&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line35&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line35</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line45&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line45&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line45</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line55&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line55&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line55</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line65&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line65&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line65</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line75&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line75&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line75</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line85&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line85&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line85</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line95&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line95&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line95</span><span class="p">);</span>
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line10&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line10&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line10</span><span class="p">);</span>
+
+
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.y-axis&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">yAxis</span><span class="p">)</span>
+    <span class="nx">svg</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.y-axis&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="s2">&quot;rotate(-90)&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;.71em&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">style</span><span class="p">(</span><span class="s2">&quot;text-anchor&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">);</span>
+
+<span class="p">});</span>
+
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This selects the items that need to be recalibrated according to the new data (the code’s all in the block/gist) and changes them accordingly.</p>
+<p>A few notes:</p>
+<ul>
+<li>
+<p>Where data was NaN, I inserted the column average using the method outlined in <a href="http://stackoverflow.com/questions/18689823/pandas-dataframe-replace-nan-values-with-average-of-columns">this</a> StackOverflow entry. You can see where this impacts the graph in instances like the “unknown” genre where the data is sparser and the end of the line flattens out.</p>
+</li>
+<li>
+<p>You will notice that the domain of the x-axis does not change. I also have a version of this that uses multiple csvs instead of one big csv. In the other version, if there is no data after a certain age in a certain genre, the domain changes to fit that range of ages. I opted against this approach because I thought in practice one csv was more likely to be used in this scenario (I’m new to this so I could be wrong). Also, I find it informative to see the changes in rating by genre for each age occur solely on the vertical plane – it makes it just a bit easier for me to track the changes between genre with my eye.</p>
+</li>
+</ul>
+<p>I’m excited to work with the interactive aspects of d3.js, and am looking forward to continuing.</p>
+    </div>
+ 
+            </article>
+        </section>
+    </div> <!-- span -->
+</div>
+<div class="article-page">
+    <div class="span7 offset2">
+        <header class="article">
             <h2><a href="./posts/2014/03/choropleths/" rel="bookmark">Using choropleths to visualize poverty of minors compared to all age groups in America</a></h2>
             <time datetime="2014-03-25T00:00:00">
                 Mar 25, 2014
@@ -72,7 +283,8 @@
     <div class="span7">
         <section>
             <article class="entry">
-    <div id="first-article">
+    <div class="article-summary">
+        <!-- show full content instead of summary -->
         <p>I recently found this interesting dataset of <a href="http://www.census.gov/did/www/saipe/data/statecounty/data/2012.html">Small Area Income and Poverty Estimates</a>. It contains several variables concerning poverty rates across different counties in the United States. The ones I will focus on for this post are the percentage of people of all ages living in poverty, the percentage of individuals under 18 living in poverty, and the percentage of related children age 5-17 (school age) in families in poverty in 2012, which is the most recent year available. </p>
 <p>I want to take a look at how poverty rates differ across these age groups in various counties and I thought using choropleths might be a good way to visualize those differences. (I found out after writing this that they actually do have choropleths on the census.gov website, but they took a different approach to theirs - they are in different color schemes with different quantize scales across age group and are each on a separate page. When doing this, I opted to look at the different age groups in the same color scheme, with the same quantize scale, next to one another, as I wanted to compare the groups.)</p>
 <p>I am going to use this <a href="http://bl.ocks.org/mbostock/4060606">choropleth</a> designed by <a href="http://bost.ocks.org/mike/">Mike Bostock</a>, which I really liked for this purpose. I’m just going to make a few small modifications – swapping out the blue and green values in the color scheme (just for experimentation’s sake) and adding a black background since some of the lower values in this particular dataset end up getting washed out in the white, especially around the coastal areas. Oh, and clearly the data I use will be different!</p>
@@ -605,6 +817,9 @@ This is the book I used to familiarize myself with D3. It has excellent code exa
 					</li>
 					<li>
 						<a href="./category/collaborative-filtering.html">Collaborative filtering</a>
+					</li>
+					<li>
+						<a href="./category/d3js.html">D3.js</a>
 					</li>
 					<li>
 						<a href="./category/data-science.html">data science</a>

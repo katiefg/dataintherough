@@ -6,7 +6,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Introduction / Data in the Rough</title>
+        <title>Movie ratings across age and genre: making a line graph interactive using d3.js / Data in the Rough</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
@@ -58,9 +58,9 @@
 <div class="article-page">
     <div class="span7 offset2">
         <header class="article">
-            <h2><a href="../../../../posts/2014/03/introduction/" rel="bookmark">Introduction</a></h2>
-            <time datetime="2014-03-10T00:00:00">
-                Mar 10, 2014
+            <h2><a href="../../../../posts/2014/03/interactive_line/" rel="bookmark">Movie ratings across age and genre: making a line graph interactive using d3.js</a></h2>
+            <time datetime="2014-03-31T00:00:00">
+                Mar 31, 2014
             </time>
         </header>
     </div>
@@ -70,16 +70,16 @@
         <dl class="dl-horizontal">
             <dt><i class="icon-file"></i></dt>
             <dd>
-                <a href="../../../../category/data-science.html">
-                    data science
+                <a href="../../../../category/d3js.html">
+                    D3.js
                 </a>
             </dd>
 
             <dt><i class="icon-tags"></i></dt>
             <dd>
                     <a href="../../../../tag/d3js.html">d3.js</a>
-<span class="separator">/</span>                    <a href="../../../../tag/data-science.html">data science</a>
-<span class="separator">/</span>                    <a href="../../../../tag/python.html">python</a>
+<span class="separator">/</span>                    <a href="../../../../tag/line-chart.html">line chart</a>
+<span class="separator">/</span>                    <a href="../../../../tag/movielens.html">movielens</a>
             </dd>
         </dl>
 
@@ -91,26 +91,52 @@
     <div class="span7">
         <section>
             <article class="entry">
-    <p>Hello, everyone, and welcome.</p>
-<p>In my recent exploration of data science and visualization tools and attempts to apply them, I have found that there is rarely one resource that explains 100% of what needs to be done – and I’m glad, because the search for the information across multiple sources is half the fun! I hope that I can add to the pool of resources and examples available on the internet in a productive way, and that perhaps something I do on here will be the missing piece in someone else’s puzzle.</p>
-<p>I also received some valuable advice, stating that a good way to begin with a blog is to write as though your audience were yourself, two or three weeks ago. This way, you have a better grasp of the issues that are relevant when learning a new tool. Following that advice is how I plan to start this blog. </p>
-<p>Over the next several posts I’m going to be heavily referencing some really great resources I’ve found, so it seems this is as good a place as any to introduce them.</p>
+    <p>How do people of different ages rate different genres?</p>
+<p>When I looked at the MovieLens dataset from GroupLens Research at the University of Minnesota, which I’ve used before, this question sprang to my mind. I wanted to be able to have a line graph of all the different raters’ ages by ratings, but also to have a different graph for each genre, and I wanted users to be able to switch between the two.</p>
+<p>Luckily for me, Mike Bostock already had an example of a <a href="http://bl.ocks.org/mbostock/3883245">line graph</a> and I used that as the jumping-off point for a visualization of ratings by age in different genres.</p>
+<p><a href="http://bl.ocks.org/katiefg/9835322">Here’s the block for the new chart.</a> </p>
+<p>I made a few minor modifications like changing the size of a few things to accommodate a drop-down menu, and changing the labels. I then added a dropdown menu with all the different genres set as the values. These values are also the column headers in my csv.  </p>
+<p>Then, all I had to do was set up a event listener for switching the item in the drop-down menu:</p>
+<div class="highlight"><pre><span class="n">d3</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;select&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">&quot;change&quot;</span><span class="p">,</span> <span class="n">change</span><span class="p">);</span>
+</pre></div>
+
+
+<p>And set up that change function to change the column in the csv:</p>
+<p>function change() {</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+<span class="nx">d3</span><span class="p">.</span><span class="nx">csv</span><span class="p">(</span><span class="s2">&quot;age_genre.csv&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="nx">data</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">d</span><span class="p">.</span><span class="nx">age</span>  <span class="o">=</span> <span class="o">+</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">;</span>
+        <span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span> <span class="o">=</span> <span class="o">+</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">;</span>
+    <span class="p">});</span>
+
+    <span class="kd">var</span> <span class="nx">line</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
+    <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
+
+<span class="nx">x</span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">extent</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">;</span> <span class="p">}));</span>
+<span class="nx">y</span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">extent</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">;</span> <span class="p">}))</span>
+</pre></div>
+
+
+<p>Then, the rest of the function selects the items that need to be recalibrated according to the new data (the code’s all in the block).</p>
+<p>A few notes:</p>
 <ul>
 <li>
-<p><a href="http://chimera.labs.oreilly.com/books/1230000000345">Interactive Data Visualization for the Web: An Introduction to Designing with D3</a>, by Scott Murray.
-This is the book I used to familiarize myself with D3. It has excellent code examples and is very user-friendly. Since this is where a lot of my D3 knowledge comes from, I’ll be coming back to it in future posts.</p>
+<p>Where data was NaN, I inserted the column average using the method outlined in <a href="http://stackoverflow.com/questions/18689823/pandas-dataframe-replace-nan-values-with-average-of-columns">this</a> StackOverflow entry. You can see where this impacts the graph in instances like the “unknown” genre where the data is sparser and the end of the line flattens out.</p>
 </li>
 <li>
-<p><a href="http://shop.oreilly.com/product/9780596529321.do">Programming Collective Intelligence: Building Smart Web 2.0 Applications</a>, by Toby Segaran.
- I will be working through some of the algorithms described in this book on this blog, and looking a bit more at their implementation.</p>
+<p>You will notice that the domain of the x-axis does not change. 
+ I also have a version of this that uses multiple csvs instead of one big csv. In this version, if there is no data after a certain age in a certain genre, the domain changes. I opted against this approach because I thought in practice one csv was more likely to be used in this scenario (I’m new to this so I could be wrong). Also, I found it informative to see the changes in rating by genre for each age occur solely on the vertical plane – it makes it just a bit easier for me to track the changes between genre with my eye.</p>
 </li>
 <li>
-<p>This link is on the links page too: I’ll be making extensive use of Mike Bostock’s <a href="https://github.com/mbostock/d3/wiki/Gallery">D3 Gallery</a> for examples and inspiration. More specific references from within the gallery to follow!</p>
+<p>It’s pretty clear that this could benefit from some regularization across age, and weighting by the number of observations. The next time I do something like this, I can calculate the weighting before the d3 implementation, and I am sure there is a way in d3 to implement regularization. I will update the blog when I learn how to do this. </p>
 </li>
 </ul>
-<p>Thank you again for stopping by and please feel free to contact me. I hope you enjoy your time here.</p>
-<p>All the best,</p>
-<p>Katie</p>
+<p>Even though this isn’t a finished product, I’m excited work with the interactive aspects of d3.js, and am looking forward to continuing.</p>
 
             </article>
         </section>
