@@ -76,9 +76,9 @@
         <p>How do people of different ages rate different genres of film?</p>
 <p>When I looked at the MovieLens dataset from GroupLens Research at the University of Minnesota, this question sprang to my mind. I wanted to be able to have a line graph of all the different raters’ ages by ratings, but also to have a different graph for each genre, and I wanted users to be able to switch between each graph.</p>
 <p>Luckily for me, Mike Bostock already had an example of a <a href="http://bl.ocks.org/mbostock/3883245">line graph</a> and I used that as the jumping-off point for a visualization of ratings by age in different genres.</p>
-<p><a href="http://bl.ocks.org/katiefg/9913899">Here’s the block for my new chart.</a> </p>
+<p><a href="http://bl.ocks.org/katiefg/9913899">Here’s my new chart.</a> I used <a href="http://bl.ocks.org/">blocks</a>, which as it says on the homepage, is "a simple viewer for code examples hosted on GitHub Gist". It's connected to a gist with all the necessary files - in this case, an html document and a csv.</p>
 <p>I made a few modifications like changing the size to accommodate a drop-down menu, and changing the labels. I then added a dropdown menu with all the different genres set as the values. These values are also the column headers in my csv.  </p>
-<p>I also used different bundle interpolation values on multiple lines because I wanted to look at multiple tension parameters. I used tension parameters between .05 (that’s the bluest line) and 1(that’s the greenest line). I wanted to depict the general trends while still capturing some of the variance between age groups. </p>
+<p>I used different bundle interpolation values on multiple lines because I wanted to look at multiple tension parameters. I chose tension parameters between .05 (that’s the bluest line) and .95 (that’s the greenest line). The values increase .1 (.15, .25, etc.) with progressively greener lines. I wanted to depict the general trends while still capturing some of the variance between age groups. </p>
 <p>Then, all I had to do was set up an event listener for switching the item in the drop-down menu:</p>
 <div class="highlight"><pre><span class="n">d3</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;select&quot;</span><span class="p">)</span>
     <span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">&quot;change&quot;</span><span class="p">,</span> <span class="n">change</span><span class="p">);</span>
@@ -157,12 +157,6 @@
         <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
         <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
 
-    <span class="kd">var</span> <span class="nx">line10</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
-        <span class="p">.</span><span class="nx">interpolate</span><span class="p">(</span><span class="s2">&quot;bundle&quot;</span><span class="p">)</span>
-        <span class="p">.</span><span class="nx">tension</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">age</span><span class="p">);</span> <span class="p">})</span>
-        <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">);</span> <span class="p">});</span>
-
 
     <span class="nx">y</span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">extent</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">d</span><span class="cp">[</span><span class="nb">value</span><span class="cp">]</span><span class="p">;</span> <span class="p">}))</span>
 
@@ -226,12 +220,6 @@
         <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line95&quot;</span><span class="p">)</span>
         <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
         <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line95</span><span class="p">);</span>
-
-    <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.line10&quot;</span><span class="p">)</span>
-        <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;line10&quot;</span><span class="p">)</span>
-        <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
-        <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">line10</span><span class="p">);</span>
 
 
     <span class="nx">svg</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.y-axis&quot;</span><span class="p">)</span>
