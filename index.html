@@ -74,8 +74,8 @@
             <article class="entry">
     <div id="first-article">
         <p>How do people of different ages rate different genres of film?</p>
-<p>When I looked at the MovieLens dataset from GroupLens Research at the University of Minnesota, this question sprang to my mind. I wanted to graph the raters' average ratings by age, but also to have a different graph for each genre, and I wanted users to be able to switch between each graph.</p>
-<p>Luckily for me, Mike Bostock already had an example of a <a href="http://bl.ocks.org/mbostock/3883245">line graph</a> and I used that as the jumping-off point for a visualization of ratings by age in different genres.</p>
+<p>When I looked at the MovieLens dataset from GroupLens Research at the University of Minnesota, this question sprang to my mind. I wanted to graph the raters' average ratings by age, but also to have a different chart for each genre, and I wanted users to be able to switch between each chart.</p>
+<p>Luckily for me, Mike Bostock already had an example of a <a href="http://bl.ocks.org/mbostock/3883245">line chart</a> and I used that as the jumping-off point for a visualization of ratings by age in different genres.</p>
 <p><a href="http://bl.ocks.org/katiefg/9913899">Here’s my new chart.</a> </p>
 <p>I used <a href="http://bl.ocks.org/">blocks</a>, which as it says on the homepage, is "a simple viewer for code examples hosted on GitHub Gist". It's connected to a gist with all the necessary files - in this case, an html document and a csv.</p>
 <p>I made a few modifications like changing the size to accommodate a drop-down menu, and changing the labels. I then added a dropdown menu with all the different genres set as the values. These values are also the column headers in my csv.  </p>
@@ -243,7 +243,7 @@
 <p>A few notes:</p>
 <ul>
 <li>
-<p>Where data was NaN, I inserted the column average using the method outlined in <a href="http://stackoverflow.com/questions/18689823/pandas-dataframe-replace-nan-values-with-average-of-columns">this</a> StackOverflow entry. You can see where this impacts the graph in instances like the “unknown” genre where the data is sparser and the end of the line flattens out.</p>
+<p>Where data was NaN, I inserted the column average using the method outlined in <a href="http://stackoverflow.com/questions/18689823/pandas-dataframe-replace-nan-values-with-average-of-columns">this</a> StackOverflow entry. You can see where this impacts the chart in instances like the “unknown” genre where the data is sparser and the end of the line flattens out.</p>
 </li>
 <li>
 <p>You will notice that the domain of the x-axis does not change. I also have a version of this that uses multiple csvs instead of one big csv. In the other version, if there is no data after a certain age in a certain genre, the domain changes to fit that range of ages. I opted against this approach because I thought in practice one csv was more likely to be used in this scenario (I’m new to this so I could be wrong). Also, I find it informative to see the changes in rating by genre for each age occur solely on the vertical plane – it makes it just a bit easier for me to track the changes between genre with my eye.</p>
