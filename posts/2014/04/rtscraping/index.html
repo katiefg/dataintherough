@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Scraping rotten tomatoes movie pages for description and genre / Data in the Rough</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="shortcut icon" href="../../../../theme/favicon.ico" />
+        <link rel="apple-touch-icon" href="../../../../theme/apple-touch-icon-iphone.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="../../../../theme/apple-touch-icon-ipad.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="../../../../theme/apple-touch-icon-iphone4.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="../../../../theme/apple-touch-icon-ipad3.png" />
+
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../../../theme/css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="../../../../theme/css/font-awesome.min.css">
+        <link rel="stylesheet" href="../../../../theme/css/colorbox.css">
+
+        <link rel="stylesheet" href="../../../../theme/css/main.css">
+
+        <script src="../../../../theme/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="row">
+                <div class="span9">
+                    <div class="row">
+                    
+
+                        <div class="span7"> <!-- header -->
+                            <!--[if lt IE 9]>
+                                <p class="chromeframe alert alert-warning">You are using an <strong>outdated</strong> browser, and this site might not look best in it. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+                            <![endif]-->
+                            <header id="site-header">
+                                <div id="site-header-content">
+                                    <h1>
+                                        <a href="../../../..">Data in the Rough</a>
+                                        <small>
+                                            <span class="divider">/</span> Exploring data science and visualization
+                                        </small>
+                                    </h1>
+                                    <p>
+                                        
+                                    </p>
+                                </div>
+                            </header>
+                        </div> <!-- header span -->
+                    </div> <!-- header row -->
+
+                    <div class="row"> <!-- content -->
+                        <div class="content">
+<div class="article-page">
+    <div class="span7 offset2">
+        <header class="article">
+            <h2><a href="../../../../posts/2014/04/rtscraping/" rel="bookmark">Scraping rotten tomatoes movie pages for description and genre</a></h2>
+            <time datetime="2014-04-10T00:00:00">
+                Apr 10, 2014
+            </time>
+        </header>
+    </div>
+
+    <div class="span2">
+    <div class="article-meta article-meta-border">
+        <dl class="dl-horizontal">
+            <dt><i class="icon-file"></i></dt>
+            <dd>
+                <a href="../../../../category/web-scraping.html">
+                    Web scraping
+                </a>
+            </dd>
+
+            <dt><i class="icon-tags"></i></dt>
+            <dd>
+                    <a href="../../../../tag/beautiful-soup.html">Beautiful Soup</a>
+<span class="separator">/</span>                    <a href="../../../../tag/requests.html">Requests</a>
+<span class="separator">/</span>                    <a href="../../../../tag/rotten-tomatoes.html">Rotten Tomatoes</a>
+            </dd>
+        </dl>
+
+        <b class="border-notch notch"></b>
+        <b class="notch"></b>
+    </div>
+    </div>
+
+    <div class="span7">
+        <section>
+            <article class="entry">
+    <p>I’ve been working on a few projects lately, and while none of them are quite at the point where I am ready to blog about them, I thought I could share how I got some of the information I’ve been using so that you could use it too.</p>
+<p>It turns out that it is a pretty basic process to extract information from many movie pages on Rotten Tomatoes, as they have a sitemap. I used requests and Beautiful Soup to do this and I thought I’d pass along the code. </p>
+<p>I was particularly interested in the movie synopses and primary genre (first genre listed) information, as I want to see if anything about the description predicts genre (I’m working on this presently). So at the end of this initial process I wanted to have a csv that contained the movie page url (for future reference), the primary genre and the synopsis. This code will get you that. You can also extract other information from RT using this method.</p>
+<p>This code is in two parts – the first part gives you the list of all the urls for movie pages that you want to use, then dumps it with pickle so you can access it at any time. The sitemap contains several urls, each of which contains itself a larger set of movie page urls. You’ll notice that I only used the first three of the initial urls in this example, but you can use as many as you like.</p>
+<div class="highlight"><pre><span class="n">from</span> <span class="n">bs4</span> <span class="n">import</span> <span class="n">BeautifulSoup</span>
+<span class="n">import</span> <span class="n">requests</span>
+<span class="n">import</span> <span class="n">re</span>
+<span class="n">import</span> <span class="n">pickle</span>
+
+<span class="n">initial_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">total_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">r</span><span class="o">=</span><span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="err">&#39;</span><span class="n">http</span><span class="o">:</span><span class="c1">//api.rottentomatoes.com/feeds/private/us/&#39;</span>
+    <span class="err">&#39;</span><span class="mi">0</span><span class="n">_GoogleSitemap_Feed</span><span class="p">.</span><span class="n">xml</span><span class="o">?</span><span class="n">apikey</span><span class="o">=</span><span class="mi">8698</span><span class="n">kwgfmuwxxrncfsdyvhkf</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">soup</span><span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">html5lib</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">soup</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">find_all</span><span class="p">(</span><span class="err">&#39;</span><span class="n">loc</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">soup</span><span class="o">:</span>
+    <span class="n">initial_list</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">string</span><span class="p">)</span>
+
+
+<span class="n">def</span> <span class="n">make_url_list</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">:</span>
+    <span class="n">r</span><span class="o">=</span><span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">soup</span><span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">html5lib</span><span class="err">&#39;</span><span class="p">)</span>
+    <span class="n">text</span><span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sc">&#39;\s&#39;</span><span class="p">,</span><span class="err">&#39;&#39;</span><span class="p">,</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">split</span><span class="o">=</span><span class="n">text</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="err">&#39;</span><span class="n">http</span><span class="err">&#39;</span><span class="p">)</span>
+    <span class="n">total_list</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">initial_list</span><span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">3</span><span class="p">]</span><span class="o">:</span>
+   <span class="n">make_url_list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="n">with</span> <span class="n">open</span><span class="p">(</span><span class="err">&#39;</span><span class="n">url_list</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">wb</span><span class="err">&#39;</span><span class="p">)</span> <span class="n">as</span> <span class="n">f</span><span class="o">:</span>
+    <span class="n">pickle</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">total_list</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The second part of the code takes this list of movie page urls, goes to them, extracts the information we want, and puts it in a csv. You can see that I’m using id="movieSynopsis" and itemprop="genre", because those are the elements I care about in this example, but you can look at the source code yourself and find other elements you care about, then replace my chosen elements with yours. </p>
+<div class="highlight"><pre><span class="n">import</span> <span class="n">bs4</span>
+<span class="n">from</span> <span class="n">bs4</span> <span class="n">import</span> <span class="n">BeautifulSoup</span>
+<span class="n">import</span> <span class="n">pandas</span> <span class="n">as</span> <span class="n">pd</span>
+<span class="n">import</span> <span class="n">requests</span>
+<span class="n">import</span> <span class="n">re</span>
+<span class="n">import</span> <span class="n">pickle</span>
+
+<span class="n">synop_dict</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">genre_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="n">def</span> <span class="n">get_rt_synopsis</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span><span class="o">:</span>
+    <span class="k">if</span> <span class="n">movie</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="o">:</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="err">&#39;</span><span class="n">http</span><span class="err">&#39;</span><span class="o">+</span><span class="n">movie</span><span class="p">)</span>
+        <span class="n">soup</span><span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">html5lib</span><span class="err">&#39;</span><span class="p">)</span>
+        <span class="err">#</span><span class="n">find</span> <span class="n">and</span> <span class="n">isolate</span> <span class="n">the</span> <span class="n">text</span> <span class="n">of</span> <span class="n">the</span> <span class="n">synopsis</span>
+        <span class="n">synopsis</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">id</span><span class="o">=</span><span class="s">&quot;movieSynopsis&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">synopsis</span><span class="p">,</span><span class="n">bs4</span><span class="p">.</span><span class="n">element</span><span class="p">.</span><span class="n">Tag</span><span class="p">)</span><span class="o">:</span>
+            <span class="n">synopsis</span> <span class="o">=</span> <span class="n">synopsis</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+            <span class="n">synopsis</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sc">&#39;\t&#39;</span><span class="p">,</span><span class="err">&#39;&#39;</span><span class="p">,</span><span class="n">synopsis</span><span class="p">)</span>
+            <span class="n">synopsis</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">,</span><span class="err">&#39;&#39;</span><span class="p">,</span><span class="n">synopsis</span><span class="p">)</span>
+            <span class="n">synop_dict</span><span class="p">[</span><span class="n">movie</span><span class="p">]</span><span class="o">=</span> <span class="n">synopsis</span>
+        <span class="n">genre</span><span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">itemprop</span><span class="o">=</span><span class="s">&quot;genre&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">genre</span><span class="p">,</span><span class="n">bs4</span><span class="p">.</span><span class="n">element</span><span class="p">.</span><span class="n">Tag</span><span class="p">)</span><span class="o">:</span>
+            <span class="n">genre</span> <span class="o">=</span> <span class="n">genre</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+            <span class="n">genre_dict</span><span class="p">[</span><span class="n">movie</span><span class="p">]</span><span class="o">=</span><span class="n">genre</span>
+
+
+<span class="n">with</span> <span class="n">open</span><span class="p">(</span><span class="err">&#39;</span><span class="n">url_list</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">rb</span><span class="err">&#39;</span><span class="p">)</span> <span class="n">as</span> <span class="n">f</span><span class="o">:</span>
+    <span class="n">list</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">list</span><span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="p">]</span><span class="o">:</span>
+    <span class="n">get_rt_synopsis</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="n">synop</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">Series</span><span class="p">(</span><span class="n">synop_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="err">&#39;</span><span class="n">synopsis</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">genre</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">Series</span><span class="p">(</span><span class="n">genre_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="err">&#39;</span><span class="n">genre</span><span class="err">&#39;</span><span class="p">)</span>
+
+<span class="n">genre_synop</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span><span class="n">synop</span><span class="p">,</span><span class="n">genre</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">genre_synop</span> <span class="o">=</span> <span class="n">genre_synop</span><span class="p">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="n">genre_synop</span><span class="p">.</span><span class="n">to_csv</span><span class="p">(</span><span class="err">&#39;</span><span class="n">genre_synop</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">,</span> <span class="n">index_label</span><span class="o">=</span><span class="s">&quot;movie&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="err">&#39;</span><span class="n">utf</span><span class="o">-</span><span class="mi">8</span><span class="err">&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Now I have the csv I wanted. I hope that this can help someone get information from the RT movie pages for whatever analysis they might want to conduct.</p>
+
+            </article>
+        </section>
+    </div> <!-- span -->
+</div>                        </div>
+                    </div> <!-- content row -->
+
+                    <div class="row"> <!-- footer -->
+                        <div class="span7 offset2">
+                            <footer id="site-footer">
+                                <p>
+                                    <a href="" target="_blank">
+                                        
+                                    </a> Katie Green /
+                                    <a href="../../../../">Archives</a>
+                                </p>
+                                <p>
+                                    Powered by
+                                    <a href="https://github.com/getpelican/pelican" target="_blank">
+                                        Pelican
+                                    </a>
+                                    /
+                                    Source code on
+                                    <a href="http://github.com/siovene/iovene.com" target="blank">
+                                        GitHub
+                                    </a>
+                                    /
+                                    Theme <code>Lannisport</code>, also on
+                                    <a href="http://github.com/siovene/lannisport" target="_blank">
+                                        GitHub
+                                    </a>
+                                </p>
+                            </footer>
+                        </div> <!-- footer span -->
+                    </div> <!-- footer row -->
+                </div> <!-- header+content+footer span -->
+
+                <div class="span3">
+                    <aside class="affix">
+                        <div id="sidebar">
+                            <div id="social-icons">
+                                    <span class="social-icon">
+                                        <a href="http://www.linkedin.com/pub/katie-green/12/651/70a" target="_blank" title="LinkedIn">
+                                            <i class="icon-linkedin"></i>
+                                        </a>
+                                    </span>
+                                    <span class="social-icon">
+                                        <a href="https://twitter.com/katie_fg" target="_blank" title="Twitter">
+                                            <i class="icon-twitter"></i>
+                                        </a>
+                                    </span>
+                            </div>
+
+                            <div id="navigation">
+<nav>
+	<h2>Pages</h2>
+	<ul>
+		<li>
+			<ul>
+				<li>
+					<a href="../../../..">Blog</a>
+				</li>
+
+					<li>
+						<a href="../../../../pages/about.html">About</a>
+					</li>
+					<li>
+						<a href="../../../../pages/blogs.html">Links and blogs</a>
+					</li>
+					<li>
+						<a href="../../../../pages/contact.html">Contact</a>
+					</li>
+					<li>
+						<a href="../../../../pages/license.html">License</a>
+					</li>
+			</ul>
+		</li>
+	</ul>
+</nav>
+
+<nav>
+	<h2>Categories</h2>
+	<ul>
+		<li>
+			<ul>
+					<li>
+						<a href="../../../../category/choropleths.html">Choropleths</a>
+					</li>
+					<li>
+						<a href="../../../../category/collaborative-filtering.html">Collaborative filtering</a>
+					</li>
+					<li>
+						<a href="../../../../category/d3js.html">D3.js</a>
+					</li>
+					<li>
+						<a href="../../../../category/data-science.html">data science</a>
+					</li>
+					<li>
+						<a href="../../../../category/pelican-blogging.html">Pelican blogging</a>
+					</li>
+					<li>
+						<a href="../../../../category/web-scraping.html">Web scraping</a>
+					</li>
+			</ul>
+		</li>
+	</ul>
+</nav>                            </div>
+                        </div> <!-- sidebar -->
+
+                        <p id="back-to-top">
+                            <a href="#">
+                                <i class="icon-double-angle-up"></i> Back to top
+                            </a>
+                        </p>
+
+                    </aside>
+                </div> <!-- logo+navigation span -->
+            </div> <!-- row -->
+
+        </div> <!-- /container -->
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="../../../../theme/js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
+        <script>$('body').popover || document.write('<script src="../../../../theme/js/vendor/bootstrap.min.js"><\/script>')</script>
+
+        <script src="../../../../theme/js/jquery.captions.js"></script>
+        <script src="../../../../theme/js/vendor/jquery.colorbox-min.js"></script>
+
+        <script src="../../../../theme/js/main.js"></script>
+
+        <script>
+            var _gaq=[['_setAccount',''],['_trackPageview'],['_trackPageLoadTime'],['_gat._anonymizeIp']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>

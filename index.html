@@ -59,6 +59,115 @@
 <div class="article-page">
     <div class="span7 offset2">
         <header class="article">
+            <h2><a href="./posts/2014/04/rtscraping/" rel="bookmark">Scraping rotten tomatoes movie pages for description and genre</a></h2>
+            <time datetime="2014-04-10T00:00:00">
+                Apr 10, 2014
+            </time>
+        </header>
+    </div>
+
+    <div class="span2">
+    </div>
+
+    <div class="span7">
+        <section>
+            <article class="entry">
+    <div id="first-article">
+        <p>I’ve been working on a few projects lately, and while none of them are quite at the point where I am ready to blog about them, I thought I could share how I got some of the information I’ve been using so that you could use it too.</p>
+<p>It turns out that it is a pretty basic process to extract information from many movie pages on Rotten Tomatoes, as they have a sitemap. I used requests and Beautiful Soup to do this and I thought I’d pass along the code. </p>
+<p>I was particularly interested in the movie synopses and primary genre (first genre listed) information, as I want to see if anything about the description predicts genre (I’m working on this presently). So at the end of this initial process I wanted to have a csv that contained the movie page url (for future reference), the primary genre and the synopsis. This code will get you that. You can also extract other information from RT using this method.</p>
+<p>This code is in two parts – the first part gives you the list of all the urls for movie pages that you want to use, then dumps it with pickle so you can access it at any time. The sitemap contains several urls, each of which contains itself a larger set of movie page urls. You’ll notice that I only used the first three of the initial urls in this example, but you can use as many as you like.</p>
+<div class="highlight"><pre><span class="n">from</span> <span class="n">bs4</span> <span class="n">import</span> <span class="n">BeautifulSoup</span>
+<span class="n">import</span> <span class="n">requests</span>
+<span class="n">import</span> <span class="n">re</span>
+<span class="n">import</span> <span class="n">pickle</span>
+
+<span class="n">initial_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">total_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">r</span><span class="o">=</span><span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="err">&#39;</span><span class="n">http</span><span class="o">:</span><span class="c1">//api.rottentomatoes.com/feeds/private/us/&#39;</span>
+    <span class="err">&#39;</span><span class="mi">0</span><span class="n">_GoogleSitemap_Feed</span><span class="p">.</span><span class="n">xml</span><span class="o">?</span><span class="n">apikey</span><span class="o">=</span><span class="mi">8698</span><span class="n">kwgfmuwxxrncfsdyvhkf</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">soup</span><span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">html5lib</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">soup</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">find_all</span><span class="p">(</span><span class="err">&#39;</span><span class="n">loc</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">soup</span><span class="o">:</span>
+    <span class="n">initial_list</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">string</span><span class="p">)</span>
+
+
+<span class="n">def</span> <span class="n">make_url_list</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">:</span>
+    <span class="n">r</span><span class="o">=</span><span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">soup</span><span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">html5lib</span><span class="err">&#39;</span><span class="p">)</span>
+    <span class="n">text</span><span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sc">&#39;\s&#39;</span><span class="p">,</span><span class="err">&#39;&#39;</span><span class="p">,</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">split</span><span class="o">=</span><span class="n">text</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="err">&#39;</span><span class="n">http</span><span class="err">&#39;</span><span class="p">)</span>
+    <span class="n">total_list</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">initial_list</span><span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">3</span><span class="p">]</span><span class="o">:</span>
+   <span class="n">make_url_list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="n">with</span> <span class="n">open</span><span class="p">(</span><span class="err">&#39;</span><span class="n">url_list</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">wb</span><span class="err">&#39;</span><span class="p">)</span> <span class="n">as</span> <span class="n">f</span><span class="o">:</span>
+    <span class="n">pickle</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">total_list</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The second part of the code takes this list of movie page urls, goes to them, extracts the information we want, and puts it in a csv. You can see that I’m using id="movieSynopsis" and itemprop="genre", because those are the elements I care about in this example, but you can look at the source code yourself and find other elements you care about, then replace my chosen elements with yours. </p>
+<div class="highlight"><pre><span class="n">import</span> <span class="n">bs4</span>
+<span class="n">from</span> <span class="n">bs4</span> <span class="n">import</span> <span class="n">BeautifulSoup</span>
+<span class="n">import</span> <span class="n">pandas</span> <span class="n">as</span> <span class="n">pd</span>
+<span class="n">import</span> <span class="n">requests</span>
+<span class="n">import</span> <span class="n">re</span>
+<span class="n">import</span> <span class="n">pickle</span>
+
+<span class="n">synop_dict</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">genre_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="n">def</span> <span class="n">get_rt_synopsis</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span><span class="o">:</span>
+    <span class="k">if</span> <span class="n">movie</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="o">:</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="err">&#39;</span><span class="n">http</span><span class="err">&#39;</span><span class="o">+</span><span class="n">movie</span><span class="p">)</span>
+        <span class="n">soup</span><span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">html5lib</span><span class="err">&#39;</span><span class="p">)</span>
+        <span class="err">#</span><span class="n">find</span> <span class="n">and</span> <span class="n">isolate</span> <span class="n">the</span> <span class="n">text</span> <span class="n">of</span> <span class="n">the</span> <span class="n">synopsis</span>
+        <span class="n">synopsis</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">id</span><span class="o">=</span><span class="s">&quot;movieSynopsis&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">synopsis</span><span class="p">,</span><span class="n">bs4</span><span class="p">.</span><span class="n">element</span><span class="p">.</span><span class="n">Tag</span><span class="p">)</span><span class="o">:</span>
+            <span class="n">synopsis</span> <span class="o">=</span> <span class="n">synopsis</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+            <span class="n">synopsis</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sc">&#39;\t&#39;</span><span class="p">,</span><span class="err">&#39;&#39;</span><span class="p">,</span><span class="n">synopsis</span><span class="p">)</span>
+            <span class="n">synopsis</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">,</span><span class="err">&#39;&#39;</span><span class="p">,</span><span class="n">synopsis</span><span class="p">)</span>
+            <span class="n">synop_dict</span><span class="p">[</span><span class="n">movie</span><span class="p">]</span><span class="o">=</span> <span class="n">synopsis</span>
+        <span class="n">genre</span><span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">itemprop</span><span class="o">=</span><span class="s">&quot;genre&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">genre</span><span class="p">,</span><span class="n">bs4</span><span class="p">.</span><span class="n">element</span><span class="p">.</span><span class="n">Tag</span><span class="p">)</span><span class="o">:</span>
+            <span class="n">genre</span> <span class="o">=</span> <span class="n">genre</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+            <span class="n">genre_dict</span><span class="p">[</span><span class="n">movie</span><span class="p">]</span><span class="o">=</span><span class="n">genre</span>
+
+
+<span class="n">with</span> <span class="n">open</span><span class="p">(</span><span class="err">&#39;</span><span class="n">url_list</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">rb</span><span class="err">&#39;</span><span class="p">)</span> <span class="n">as</span> <span class="n">f</span><span class="o">:</span>
+    <span class="n">list</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="n">in</span> <span class="n">list</span><span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="p">]</span><span class="o">:</span>
+    <span class="n">get_rt_synopsis</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="n">synop</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">Series</span><span class="p">(</span><span class="n">synop_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="err">&#39;</span><span class="n">synopsis</span><span class="err">&#39;</span><span class="p">)</span>
+<span class="n">genre</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">Series</span><span class="p">(</span><span class="n">genre_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="err">&#39;</span><span class="n">genre</span><span class="err">&#39;</span><span class="p">)</span>
+
+<span class="n">genre_synop</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span><span class="n">synop</span><span class="p">,</span><span class="n">genre</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">genre_synop</span> <span class="o">=</span> <span class="n">genre_synop</span><span class="p">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="n">genre_synop</span><span class="p">.</span><span class="n">to_csv</span><span class="p">(</span><span class="err">&#39;</span><span class="n">genre_synop</span><span class="p">.</span><span class="n">csv</span><span class="err">&#39;</span><span class="p">,</span> <span class="n">index_label</span><span class="o">=</span><span class="s">&quot;movie&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="err">&#39;</span><span class="n">utf</span><span class="o">-</span><span class="mi">8</span><span class="err">&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Now I have the csv I wanted. I hope that this can help someone get information from the RT movie pages for whatever analysis they might want to conduct.</p>
+    </div>
+ 
+            </article>
+        </section>
+    </div> <!-- span -->
+</div>
+<div class="article-page">
+    <div class="span7 offset2">
+        <header class="article">
             <h2><a href="./posts/2014/04/agegenrerating/" rel="bookmark">Visualizing movie ratings across age and genre using d3.js</a></h2>
             <time datetime="2014-04-01T00:00:00">
                 Apr 01, 2014
@@ -72,7 +181,8 @@
     <div class="span7">
         <section>
             <article class="entry">
-    <div id="first-article">
+    <div class="article-summary">
+        <!-- show full content instead of summary -->
         <p>How do people of different ages rate different genres of film?</p>
 <p>When I looked at the MovieLens dataset from GroupLens Research at the University of Minnesota, this question sprang to my mind. I wanted to graph the raters' average ratings by age, but also to have a different chart for each genre, and I wanted users to be able to switch between each chart.</p>
 <p>Luckily for me, Mike Bostock already had an example of a <a href="http://bl.ocks.org/mbostock/3883245">line chart</a> and I used that as the jumping-off point for a visualization of ratings by age in different genres.</p>
@@ -815,6 +925,9 @@ This is the book I used to familiarize myself with D3. It has excellent code exa
 					</li>
 					<li>
 						<a href="./category/pelican-blogging.html">Pelican blogging</a>
+					</li>
+					<li>
+						<a href="./category/web-scraping.html">Web scraping</a>
 					</li>
 			</ul>
 		</li>
